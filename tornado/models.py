@@ -1,7 +1,12 @@
 from datetime import datetime
 from flask_login import UserMixin
 from sqlalchemy.orm import backref
-from tornado import db
+from tornado import db, login_manager
+
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
 
 
 # followedの中間テーブル
@@ -20,7 +25,7 @@ class User(db.Model, UserMixin):
     username = db.Column(db.String(255), unique=True, nullable=False)
     email = db.Column(db.String(255), unique=True, nullable=False)
     password = db.Column(db.String(60), nullable=False)
-    profile_id = db.Column(db.Integer, db.ForeignKey('profile.id'), nullable=False)
+    profile_id = db.relationship("Profile", backref='user', uselist=False)
     followed = db.relationship(
                                 'User', secondary=followers,
                                 primaryjoin=(followers.c.follower_id == id), # ?
@@ -65,7 +70,7 @@ class Profile(db.Model):
     image_data = db.Column(db.String(20), nullable=False, default='default.jpg')
     content = db.Column(db.String(255), nullable=False)
     location = db.Column(db.String(255), nullable=False)
-    user_id = db.relationship(User, backref='profile', uselist=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     
     def __repr__(self):
         return f"{self.user_id.username}-Profile"
