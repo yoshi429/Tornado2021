@@ -193,3 +193,36 @@ def my_follow_user_posts():
     return jsonify({'message': current_user.username, "followPostList": followPostList})
 
 
+#　仮
+# ユーザー個人の投稿
+@app.route("/user-post-list/<int:user_id>", methods=['GET'])
+def user_post_list(user_id):
+    try:
+        user = User.query.filter_by(id=user_id).first()
+        print(user)
+    except:
+        return jsonify({'message': 'userが見つかりません'})
+    posts = user.posts
+
+    userList = []
+    for post in posts:
+        postChildList = []
+        for child_post in post.post_child:
+            post_child_dict = {
+                "location": child_post.location,
+                "imageData": child_post.image_data,
+                "category": child_post.category,
+                "content": child_post.content
+            }
+            postChildList.append(post_child_dict)
+        d = {
+            "userName": post.user.username,
+            "userId": post.user.id,
+            "goodCount": post.goods.count(),
+            "postChildList": postChildList
+        }
+        userList.append(d)
+    
+    return jsonify({'message': user.username, "userList": userList})
+
+
