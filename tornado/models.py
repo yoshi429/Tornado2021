@@ -25,18 +25,18 @@ class User(db.Model, UserMixin):
     username = db.Column(db.String(255), unique=True, nullable=False)
     email = db.Column(db.String(255), unique=True, nullable=False)
     password = db.Column(db.String(60), nullable=False)
-    profile_id = db.relationship("Profile", backref='user', uselist=False)
     followed = db.relationship(
                                 'User', secondary=followers,
                                 primaryjoin=(followers.c.follower_id == id), # ?
                                 secondaryjoin=(followers.c.followed_id == id), # ?
                                 backref=db.backref('followers', lazy='dynamic'), lazy='dynamic'
                                 )
+    profile_id = db.relationship("Profile", backref='user', uselist=False)
     posts = db.relationship('Post', backref='user', lazy=True)
     goods = db.relationship('Good', backref='user', lazy=True)
 
     def __repr__(self):
-        return self.username
+        return f"{self.username}-{self.email}"
 
     # フォローメソッド
     def follow(self, user):
@@ -68,12 +68,12 @@ class Profile(db.Model):
     __tablename__ = 'profile'
     id = db.Column(db.Integer, primary_key=True)
     image_data = db.Column(db.String(20), nullable=False, default='default.jpg')
-    content = db.Column(db.String(255), nullable=False)
-    location = db.Column(db.String(255), nullable=False)
+    content = db.Column(db.String(255), nullable=True)
+    location = db.Column(db.String(255), nullable=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     
     def __repr__(self):
-        return f"{self.user_id.username}-Profile"
+        return f"{self.user.username}-Profile"
     
 
 # class FollowRelation(db.Model): 
@@ -95,7 +95,7 @@ class Post(db.Model):
     title = db.Column(db.String(255), nullable=False)
     timestamp = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False) 
-    comment_id = db.Column(db.Integer, db.ForeignKey('comment.id'), nullable=False)
+    comment = db.relationship('Comment', backref='post', lazy=True)
     goods = db.relationship('Good', backref='post', lazy=True)
     post_child = db.relationship('PostChild', backref='post', lazy=True)
     
