@@ -114,7 +114,7 @@ class PostChild(db.Model):
     post_id = db.Column(db.Integer, db.ForeignKey('post.id'), nullable=False)
 
     def __repr__(self):
-        return f"{self.post_id.title}-Child"
+        return f"{self.post.title}-Child"
     
 
 class Good(db.Model): 
@@ -127,7 +127,7 @@ class Good(db.Model):
     post_id = db.Column(db.Integer, db.ForeignKey('post.id'), nullable=False)
 
     def __repr__(self):
-        return f"{self.user_id.username}-{self.post_id.title}"
+        return f"{self.user.username}-{self.post.title}"
 
 
 class Comment(db.Model):
@@ -142,4 +142,4 @@ class Comment(db.Model):
     
 
     def __repr__(self):
-        return f"Comment-{self.user_id.username}-{self.post_id.title}"
+        return f"{self.post.title}-{self.content}"
