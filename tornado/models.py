@@ -1,6 +1,5 @@
 from datetime import datetime
 from flask_login import UserMixin
-from sqlalchemy.orm import backref
 from tornado import db, login_manager
 
 
@@ -27,8 +26,8 @@ class User(db.Model, UserMixin):
     password = db.Column(db.String(60), nullable=False)
     followed = db.relationship(
                                 'User', secondary=followers,
-                                primaryjoin=(followers.c.follower_id == id), # ?
-                                secondaryjoin=(followers.c.followed_id == id), # ?
+                                primaryjoin=(followers.c.follower_id == id),
+                                secondaryjoin=(followers.c.followed_id == id), 
                                 backref=db.backref('followers', lazy='dynamic'), lazy='dynamic'
                                 )
     profile_id = db.relationship("Profile", backref='user', uselist=False)
@@ -48,7 +47,7 @@ class User(db.Model, UserMixin):
         if self.is_following(user):
             self.followed.remove(user)
 
-    # フォローの数
+    # フォローしているかどうか
     def is_following(self, user):
         return self.followed.filter(
             followers.c.followed_id == user.id).count() > 0
