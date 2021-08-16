@@ -1,7 +1,7 @@
 from flask import request, jsonify, redirect, url_for, render_template
 from flask_login import login_user, current_user, logout_user, login_required
 from tornado import app, db, bcrypt 
-from tornado.models import User, Profile, followers
+from tornado.models import User, Profile, followers, Post
 
 
 @app.route("/home")
@@ -162,3 +162,34 @@ def user_follower_list(user_id):
         followerList.append(d)
     
     return jsonify({'message': user.username, "follower_count": user.followers.count(), "followerList": followerList})
+
+
+#　仮
+# 自分がフォローしている人の投稿
+@app.route("/my-follow-user-posts", methods=['GET'])
+@login_required
+def my_follow_user_posts():
+    posts = current_user.followed_posts()
+
+    followPostList = []
+    for post in posts:
+        postChildList = []
+        for child_post in post.post_child:
+            post_child_dict = {
+                "location": child_post.location,
+                "imageData": child_post.image_data,
+                "category": child_post.category,
+                "content": child_post.content
+            }
+            postChildList.append(post_child_dict)
+        d = {
+            "userName": post.user.username,
+            "userId": post.user.id,
+            "goodCount": post.goods.count(),
+            "postChildList": postChildList
+        }
+        followPostList.append(d)
+
+    return jsonify({'message': current_user.username, "followPostList": followPostList})
+
+
