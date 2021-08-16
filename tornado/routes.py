@@ -4,9 +4,10 @@ from tornado import app, db, bcrypt
 from tornado.models import User, Profile, followers, Post
 
 
+
 @app.route("/home")
 def home():
-    return 'Hello'
+    return render_template('home.html')
 
 
 
