@@ -1,7 +1,7 @@
 from flask import request, jsonify, redirect, url_for, render_template
 from flask_login import login_user, current_user, logout_user, login_required
 from tornado import app, db, bcrypt 
-from tornado.models import User, Profile
+from tornado.models import User, Profile, followers
 
 
 @app.route("/home")
@@ -19,16 +19,20 @@ def user_register():
     username = data['username']
     email = data['email']
     password = data['password']
+
     if User.query.filter_by(username=username).first():
         return jsonify({'message': "このユーザーネームは既に登録されています。"}), 404
+
     if User.query.filter_by(email=email).first():
         return jsonify({'message': "このメールアドレスは既に登録されています。"}), 404
+    
     hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
     user = User(username=username, email=email, password=hashed_password)
     profile = Profile(user=user)
     db.session.add(user)
     db.session.add(profile)
     db.session.commit()
+    
     return jsonify({'message': '登録されました'})
 
 
@@ -41,6 +45,7 @@ def user_login():
     email = data['email']
     password = data['password']
     user = User.query.filter_by(email=email).first()
+
     if user and bcrypt.check_password_hash(user.password, password):
         login_user(user, remember=data['remember'])
         return jsonify({'message': "ログインできました"})
@@ -57,11 +62,16 @@ def user_logout():
     return jsonify({'message': f"{username}さんログアウトできました"})
 
 
-# プロフィール編集
+# プロフィール
 @app.route("/user-profile/<int:user_id>", methods=['GET', 'POST'])
 @login_required
 def profile(user_id):
-    user = User.query.get_or_404(user_id)
+    try:
+        user = User.query.filter_by(id=user_id).first()
+        print(user)
+    except:
+        return jsonify({'message': 'userが見つかりません'})
+
     if request.method == 'POST':
         if user != current_user:
             return jsonify({'message': 'ユーザーの編集はできません'}), 404
@@ -72,10 +82,41 @@ def profile(user_id):
         profile.content = data['content']
         db.session.commit()
         return jsonify({'message': f"{current_user.username}さんのプロフィールを変更しました"})
+
     elif request.method == 'GET':
         profile = Profile.query.filter_by(user_id=user_id).first()
         return jsonify({
                         'username': profile.user.username, 'email': profile.user.email, 'content': profile.content, 
-                        'image_data': profile.image_data, 'location': profile.location, "follower": profile.user.followers.count()
+                        'image_data': profile.image_data, 'location': profile.location, "follower": profile.user.followers.count(),
+                        "follewed": user.followed.count(),
                         })
-    return jsonify({})
+
+
+# フォロー、フォロー外す機能
+@app.route("/user-action/<int:user_id>", methods=['POST'])
+@login_required
+def user_handle_action(user_id):
+    try:
+        user = User.query.filter_by(id=user_id).first()
+        print(user)
+    except:
+        return jsonify({'message': 'のユーザーは存在しません。'})
+    data = request.get_json()
+    action = data['action']
+
+    if user == current_user:
+        return jsonify({'message': '自分をフォローすることは出来ません'})
+
+    if action == 'follow':
+        current_user.follow(user)
+        db.session.commit()
+        return jsonify({'message': f"{current_user.username}が{user.username}をフォローしました"})
+
+    elif action == 'unfollow':
+        current_user.unfollow(user)
+        db.session.commit()
+        return jsonify({'message': f"{current_user.username}が{user.username}をフォローを外しました"})    
+    
+    else:
+        return jsonify({'message': "無効なアクションです。"})
+        
