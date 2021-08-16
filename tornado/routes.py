@@ -119,4 +119,46 @@ def user_handle_action(user_id):
     
     else:
         return jsonify({'message': "無効なアクションです。"})
-        
+
+
+# フォローリスト
+@app.route("/user-follow-list/<int:user_id>", methods=['GET'])
+def user_followed_list(user_id):
+    try:
+        user = User.query.filter_by(id=user_id).first()
+        print(user)
+    except:
+        return jsonify({'message': 'userが見つかりません'})
+
+    followList = []
+    for user_query in user.followed:
+        d = {
+            "userName": user_query.username,
+            "userId": user_query.id,
+            "imageData": user_query.profile_id.image_data
+        }
+        followList.append(d)
+
+    return jsonify({'message': user.username, "follow_count": user.followed.count(), "followList": followList})
+
+
+# フォローワーリスト
+@app.route("/user-follower-list/<int:user_id>", methods=['GET'])
+def user_follower_list(user_id):
+    try:
+        user = User.query.filter_by(id=user_id).first()
+        print(user)
+    except:
+        return jsonify({'message': 'userが見つかりません'})
+
+    followerList = []
+    for user_query in user.followers:
+        print(user_query.username)
+        d = {
+            "userName": user_query.username,
+            "userId": user_query.id,
+            "imageData": user_query.profile_id.image_data
+        }
+        followerList.append(d)
+    
+    return jsonify({'message': user.username, "follower_count": user.followers.count(), "followerList": followerList})
