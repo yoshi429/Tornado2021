@@ -2,6 +2,7 @@ from flask import request, jsonify, redirect, url_for, render_template
 from flask_login import login_user, current_user, logout_user, login_required
 from tornado import app, db, bcrypt 
 from tornado.models import User, Profile, followers, Post, PostChild, Comment, Good
+from tornado.utils import list_post, post_detail_list
 
 
 @app.route("/")
@@ -172,34 +173,7 @@ def user_follower_list(user_id):
 def my_follow_user_posts():
     posts = current_user.followed_posts()
     print(posts)
-    followPostList = []
-    for post in posts:
-        print(post)
-        postChildList = []
-        for child_post in post.post_child:
-            print(child_post)
-            post_child_dict = {
-                "location": child_post.location,
-                "lat": child_post.lat,
-                "lng": child_post.lng,
-                "imageData": child_post.image_data,
-                "category": child_post.category,
-                "content": child_post.content,
-                "num": child_post.num
-            }
-            postChildList.append(post_child_dict)
-
-        d = {
-            "userName": post.user.username,
-            "userId": post.user.id,
-            "postTitle": post.title,
-            "goodCount": Good.query.filter_by(post=post).count(),
-            "postChildList": postChildList,
-            "posts": PostChild.query.filter_by(post=post).count()
-        }
-        followPostList.append(d)
-
-    return jsonify({'message': current_user.username, "followPostList": followPostList})
+    return jsonify({'message': current_user.username, "followPostList": list_post(posts)})
 
 
 #　仮
@@ -212,28 +186,8 @@ def user_post_list(user_id):
     except:
         return jsonify({'message': 'userが見つかりません'})
     posts = user.posts
-
-    user_post_list = []
-    for post in posts:
-        post_child_list = []
-        for child_post in post.post_child:
-            post_child_dict = {
-                "location": child_post.location,
-                "imageData": child_post.image_data,
-                "category": child_post.category,
-                "content": child_post.content
-            }
-            post_child_list.append(post_child_dict)
-        d = {
-            "userName": post.user.username,
-            "userId": post.user.id,
-            "postId": post.id,
-            "goodCount": Good.query.filter_by(post=post).count(),
-            "postChildList": post_child_list
-        }
-        user_post_list.append(d)
-    
-    return jsonify({'message': user.username, "userPostList": user_post_list})
+    print(posts)
+    return jsonify({'message': user.username, "userPostList": list_post(posts)})
 
 
 #　仮
@@ -246,13 +200,19 @@ def my_good_list():
     my_good_post_list = []
     for good in goods:
         post = good.post
+        main_post = post.post_child[0]
         d = {
-            "postId": post.id,
-            "title": post.title,
-            "timestamp": post.timestamp,
-            "goodCount": Good.query.filter_by(post=post).count(),
-            "auther": post.user.username,
-            "posts": PostChild.query.filter_by(post=post).count()
+            'postId': post.id,
+            'title': post.title,
+            'timeStamp': post.timestamp,
+            'userName': post.user.username,
+            'userId': post.user.id,
+            'goodCount': Good.query.filter_by(post=post).count(),
+            'imageData': main_post.image_data,
+            'content': main_post.content,
+            'location': main_post.location,
+            'lat': main_post.lat,
+            'lng': main_post.lng
             }
         my_good_post_list.append(d)
 
@@ -332,21 +292,10 @@ def post_detail(post_id):
     if post is None:
         return jsonify({'message': "この投稿は存在しません。", "status_code": 404}) ,404
     
-    post_detail = []
-    for post_child in post.post_child:
-        d = {
-            "content": post_child.content,
-            "image_data": post_child.image_data,
-            "location": post_child.location,
-            "lat": post_child.lat,
-            "lng": post_child.lng,
-            "category": post_child.category,
-            "num": post_child.num
-        }
-        post_detail.append(d)
-        
-    return jsonify({"post_detail": post_detail})
+    post_childs = post.post_child
+    print(post_childs)
 
+    return jsonify({"post_detail": post_detail_list(post_childs)})
 
 
 # 投稿リスト
@@ -354,22 +303,6 @@ def post_detail(post_id):
 def post_list():
     posts = Post.query.order_by(Post.timestamp.desc()).all()
     print(posts)
-    post_list = []
-    for post in posts:
-        print(post)
-        main_post = post.post_child[0]
-        d = {
-            'postId': post.id,
-            'title': post.title,
-            'timeStamp': post.timestamp,
-            'userName': post.user.username,
-            'goodCount': Good.query.filter_by(post=post).count(),
-            'imageData': main_post.image_data,
-            'content': main_post.content,
-            'location': main_post.location,
-            'lat': main_post.lat,
-            'lng': main_post.lng
-        }
-        post_list.append(d)
-        
-    return jsonify({"postList": post_list})
+    return jsonify({"postList": list_post(posts)})
+
+
