@@ -33,6 +33,7 @@ class User(db.Model, UserMixin):
     profile_id = db.relationship("Profile", backref='user', uselist=False)
     posts = db.relationship('Post', backref='user', lazy=True)
     goods = db.relationship('Good', backref='user', lazy=True)
+    comments = db.relationship('Comment', backref='user', lazy=True)
 
     def __repr__(self):
         return f"{self.username}-{self.email}"
@@ -110,11 +111,14 @@ class PostChild(db.Model):
     content = db.Column(db.Text, nullable=False)
     image_data = db.Column(db.String(20), nullable=False)
     location = db.Column(db.String(255), nullable=False)
+    lat = db.Column(db.Integer, nullable=False) # 緯度 
+    lng = db.Column(db.Integer, nullable=False) # 経度
     category = db.Column(db.String(255), nullable=False)
     post_id = db.Column(db.Integer, db.ForeignKey('post.id'), nullable=False)
+    num = db.Column(db.Integer, nullable=False)
 
     def __repr__(self):
-        return f"{self.post.title}-Child"
+        return f"{self.post.title}-{self.num}"
     
 
 class Good(db.Model): 
@@ -127,7 +131,7 @@ class Good(db.Model):
     post_id = db.Column(db.Integer, db.ForeignKey('post.id'), nullable=False)
 
     def __repr__(self):
-        return f"{self.user.username}-{self.post.title}"
+        return f"{self.user.username}-{self.post.title}-Good"
 
 
 class Comment(db.Model):
