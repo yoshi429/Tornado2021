@@ -33,6 +33,7 @@ class User(db.Model, UserMixin):
     profile_id = db.relationship("Profile", backref='user', uselist=False)
     posts = db.relationship('Post', backref='user', lazy=True)
     goods = db.relationship('Good', backref='user', lazy=True)
+    comments = db.relationship('Comment', backref='user', lazy=True)
 
     def __repr__(self):
         return f"{self.username}-{self.email}"
