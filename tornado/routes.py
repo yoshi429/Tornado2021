@@ -294,7 +294,6 @@ def new_post():
 @app.route("/post-comment/<int:post_id>", methods=['POST'])
 @login_required
 def new_comment(post_id):
-
     post = Post.query.filter_by(id=post_id).first()
 
     if post is None:
@@ -308,3 +307,24 @@ def new_comment(post_id):
     return jsonify({'message': f"{current_user.username}-{content}",})
 
 
+# 投稿に対してのいいね
+@app.route("/post-good/<int:post_id>", methods=['POST'])
+@login_required
+def post_handle_good(post_id):
+    post = Post.query.filter_by(id=post_id).first()
+
+    if post is None:
+        return jsonify({'message': "この投稿は存在しません。", "status_code": 404}) ,404
+    
+    good = Good.query.filter_by(user=current_user, post=post).first()
+    
+    if good is None:
+        db.session.add(Good(user=current_user, post=post))
+        db.session.commit()
+        return jsonify({'message': f"{current_user.username}が{post.title}にいいねしました。",})
+    elif good:
+        db.session.delete(good)
+        db.session.commit()
+        return jsonify({'message': f"{current_user.username}が{post.title}にいいねを外しました。",})    
+    else:
+        return jsonify({'message': "無効なアクションです。",})
