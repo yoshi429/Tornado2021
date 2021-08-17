@@ -348,25 +348,28 @@ def post_detail(post_id):
     return jsonify({"post_detail": post_detail})
 
 
-# 投稿の編集画面
-@app.route("/post/<int:post_id>", methods=['POST'])
-def post_detail(post_id):
-    post = Post.query.filter_by(id=post_id).first()
 
-    if post is None:
-        return jsonify({'message': "この投稿は存在しません。", "status_code": 404}) ,404
-    
-    post_detail = []
-    for post_child in post.post_child:
+# 投稿リスト
+@app.route("/post/list", methods=['GET'])
+def post_list():
+    posts = Post.query.order_by(Post.timestamp.desc()).all()
+    print(posts)
+    post_list = []
+    for post in posts:
+        print(post)
+        main_post = post.post_child[0]
         d = {
-            "content": post_child.content,
-            "image_data": post_child.image_data,
-            "location": post_child.location,
-            "lat": post_child.lat,
-            "lng": post_child.lng,
-            "category": post_child.category,
-            "num": post_child.num
+            'postId': post.id,
+            'title': post.title,
+            'timeStamp': post.timestamp,
+            'userName': post.user.username,
+            'goodCount': Good.query.filter_by(post=post).count(),
+            'imageData': main_post.image_data,
+            'content': main_post.content,
+            'location': main_post.location,
+            'lat': main_post.lat,
+            'lng': main_post.lng
         }
-        post_detail.append(d)
+        post_list.append(d)
         
-    return jsonify({"post_detail": post_detail})
+    return jsonify({"postList": post_list})
