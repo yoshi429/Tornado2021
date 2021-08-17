@@ -328,3 +328,27 @@ def post_handle_good(post_id):
         return jsonify({'message': f"{current_user.username}が{post.title}にいいねを外しました。",})    
     else:
         return jsonify({'message': "無効なアクションです。",})
+
+
+# 投稿の詳細画面
+@app.route("/post/<int:post_id>", methods=['GET'])
+def post_detail(post_id):
+    post = Post.query.filter_by(id=post_id).first()
+
+    if post is None:
+        return jsonify({'message': "この投稿は存在しません。", "status_code": 404}) ,404
+    
+    post_detail = []
+    for post_child in post.post_child:
+        d = {
+            "content": post_child.content,
+            "image_data": post_child.image_data,
+            "location": post_child.location,
+            "lat": post_child.lat,
+            "lng": post_child.lng,
+            "category": post_child.category,
+            "num": post_child.num
+        }
+        post_detail.append(d)
+        
+    return jsonify({"post_detail": post_detail})
