@@ -1,7 +1,7 @@
 from flask import request, jsonify, redirect, url_for, render_template
 from flask_login import login_user, current_user, logout_user, login_required
 from tornado import app, db, bcrypt 
-from tornado.models import User, Profile, followers, Post, PostChild
+from tornado.models import User, Profile, followers, Post, PostChild, Comment, Good
 
 
 @app.route("/")
@@ -288,3 +288,23 @@ def new_post():
         
     db.session.commit()
     return jsonify({'message': current_user.username,})
+
+
+# 投稿に対してのコメント
+@app.route("/post-comment/<int:post_id>", methods=['POST'])
+@login_required
+def new_comment(post_id):
+
+    post = Post.query.filter_by(id=post_id).first()
+
+    if post is None:
+        return jsonify({'message': "この投稿は存在しません。", "status_code": 404}) ,404
+    
+    data = request.get_json()
+    content = data['content']
+    
+    db.session.add(Comment(post=post, user=current_user, content=content))
+    db.session.commit()
+    return jsonify({'message': f"{current_user.username}-{content}",})
+
+
