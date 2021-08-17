@@ -16,10 +16,8 @@ def home():
 
 
 # ユーザー登録 プロフィール自動登録
-@app.route("/user-register", methods=['POST'])
+@app.route("/user/register", methods=['POST'])
 def user_register():
-    # if current_user.is_authenticated:
-    #     return redirect(url_for('home'))
     data = request.get_json()
     username = data['username']
     email = data['email']
@@ -42,10 +40,8 @@ def user_register():
 
 
 # ログイン
-@app.route("/user-login", methods=['POST'])
+@app.route("/user/login", methods=['POST'])
 def user_login():
-    # if current_user.is_authenticated:
-    #     return redirect(url_for('home'))
     data = request.get_json()
     email = data['email']
     password = data['password']
@@ -60,7 +56,7 @@ def user_login():
 
 
 # ログアウト
-@app.route("/user-logout", methods=['POST'])
+@app.route("/user/logout", methods=['POST'])
 def user_logout():
     username = current_user.username
     logout_user()
@@ -68,7 +64,7 @@ def user_logout():
 
 
 # プロフィール
-@app.route("/user-profile/<int:user_id>", methods=['GET', 'POST'])
+@app.route("/user/profile/<int:user_id>", methods=['GET', 'POST'])
 @login_required
 def profile(user_id):
     try:
@@ -98,7 +94,7 @@ def profile(user_id):
 
 
 # フォロー、フォロー外す機能
-@app.route("/user-action/<int:user_id>", methods=['POST'])
+@app.route("/user/action/<int:user_id>", methods=['POST'])
 @login_required
 def user_handle_action(user_id):
     try:
@@ -127,7 +123,7 @@ def user_handle_action(user_id):
 
 
 # フォローリスト
-@app.route("/user-follow-list/<int:user_id>", methods=['GET'])
+@app.route("/user/follow-list/<int:user_id>", methods=['GET'])
 def user_followed_list(user_id):
     try:
         user = User.query.filter_by(id=user_id).first()
@@ -148,7 +144,7 @@ def user_followed_list(user_id):
 
 
 # フォローワーリスト
-@app.route("/user-follower-list/<int:user_id>", methods=['GET'])
+@app.route("/user/follower-list/<int:user_id>", methods=['GET'])
 def user_follower_list(user_id):
     try:
         user = User.query.filter_by(id=user_id).first()
@@ -170,8 +166,8 @@ def user_follower_list(user_id):
 
 
 #　仮
-# 自分がフォローしている人の投稿
-@app.route("/my-follow-user-posts", methods=['GET'])
+# 自分がフォローしている人の投稿リスト
+@app.route("/user/follow-posts", methods=['GET'])
 @login_required
 def my_follow_user_posts():
     posts = current_user.followed_posts()
@@ -208,7 +204,7 @@ def my_follow_user_posts():
 
 #　仮
 # ユーザー個人の投稿
-@app.route("/user-post-list/<int:user_id>", methods=['GET'])
+@app.route("/user/post-list/<int:user_id>", methods=['GET'])
 def user_post_list(user_id):
     try:
         user = User.query.filter_by(id=user_id).first()
@@ -242,7 +238,7 @@ def user_post_list(user_id):
 
 #　仮
 # 自分のいいねリスト
-@app.route("/my-good-list", methods=['GET'])
+@app.route("/user/my-good-list", methods=['GET'])
 @login_required
 def my_good_list():
     goods = Good.query.filter_by(user=current_user)
@@ -264,7 +260,7 @@ def my_good_list():
 
 
 # 投稿
-@app.route("/new-post", methods=['POST'])
+@app.route("/post/new", methods=['POST'])
 @login_required
 def new_post():
     data = request.get_json()
@@ -289,7 +285,7 @@ def new_post():
 
 
 # 投稿に対してのコメント
-@app.route("/post-comment/<int:post_id>", methods=['POST'])
+@app.route("/post/comment/<int:post_id>", methods=['POST'])
 @login_required
 def new_comment(post_id):
     post = Post.query.filter_by(id=post_id).first()
@@ -306,7 +302,7 @@ def new_comment(post_id):
 
 
 # 投稿に対してのいいね
-@app.route("/post-good/<int:post_id>", methods=['POST'])
+@app.route("/post/good/<int:post_id>", methods=['POST'])
 @login_required
 def post_handle_good(post_id):
     post = Post.query.filter_by(id=post_id).first()
@@ -330,6 +326,30 @@ def post_handle_good(post_id):
 
 # 投稿の詳細画面
 @app.route("/post/<int:post_id>", methods=['GET'])
+def post_detail(post_id):
+    post = Post.query.filter_by(id=post_id).first()
+
+    if post is None:
+        return jsonify({'message': "この投稿は存在しません。", "status_code": 404}) ,404
+    
+    post_detail = []
+    for post_child in post.post_child:
+        d = {
+            "content": post_child.content,
+            "image_data": post_child.image_data,
+            "location": post_child.location,
+            "lat": post_child.lat,
+            "lng": post_child.lng,
+            "category": post_child.category,
+            "num": post_child.num
+        }
+        post_detail.append(d)
+        
+    return jsonify({"post_detail": post_detail})
+
+
+# 投稿の編集画面
+@app.route("/post/<int:post_id>", methods=['POST'])
 def post_detail(post_id):
     post = Post.query.filter_by(id=post_id).first()
 
