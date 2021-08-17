@@ -306,3 +306,26 @@ def post_list():
     return jsonify({"postList": list_post(posts)})
 
 
+# 投稿に対してのコメントリスト
+@app.route("/post/comment/<int:post_id>/list", methods=['GET'])
+@login_required
+def comment_list(post_id):
+    post = Post.query.filter_by(id=post_id).first()
+    comments = post.comment
+    print(comments)
+    if post is None:
+        return jsonify({'message': "この投稿は存在しません。", "status_code": 404}) ,404
+    
+    if comments is None:
+        return jsonify({'message': "この投稿に対するコメントは存在しません。", "status_code": 404}) ,404
+
+    comments_list = []
+    for comment in comments:
+        d = {
+            "userId": comment.user.id,
+            "userName": comment.user.username,
+            "content": comment.content
+        }
+        comments_list.append(d)
+    
+    return jsonify({'commentsList': comments_list})
