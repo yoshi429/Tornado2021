@@ -209,9 +209,9 @@ def user_post_list(user_id):
         return jsonify({'message': 'userが見つかりません'})
     posts = user.posts
 
-    userList = []
+    user_post_list = []
     for post in posts:
-        postChildList = []
+        post_child_list = []
         for child_post in post.post_child:
             post_child_dict = {
                 "location": child_post.location,
@@ -219,16 +219,17 @@ def user_post_list(user_id):
                 "category": child_post.category,
                 "content": child_post.content
             }
-            postChildList.append(post_child_dict)
+            post_child_list.append(post_child_dict)
         d = {
             "userName": post.user.username,
             "userId": post.user.id,
-            "goodCount": post.goods.count(),
-            "postChildList": postChildList
+            "postId": post.id,
+            "goodCount": Good.query.filter_by(post=post).count(),
+            "postChildList": post_child_list
         }
-        userList.append(d)
+        user_post_list.append(d)
     
-    return jsonify({'message': user.username, "userList": userList})
+    return jsonify({'message': user.username, "userPostList": user_post_list})
 
 
 #　仮
