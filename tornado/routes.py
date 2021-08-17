@@ -1,7 +1,7 @@
 from flask import request, jsonify, redirect, url_for, render_template
 from flask_login import login_user, current_user, logout_user, login_required
 from tornado import app, db, bcrypt 
-from tornado.models import User, Profile, followers, Post
+from tornado.models import User, Profile, followers, Post, PostChild
 
 
 @app.route("/")
@@ -263,3 +263,28 @@ def my_good_list(user_id):
         myGoodPostList.append(d)
 
     return jsonify({'message': user.username, "myGoodPostList": myGoodPostList})
+
+
+# 投稿
+@app.route("/new-post", methods=['POST'])
+@login_required
+def new_post():
+    data = request.get_json()
+    title = data['title']
+    post = Post(title=title, user=current_user)
+    db.session.add(post)
+    
+    for i, child_data in enumerate(data['postChild'], start=1):
+        db.session.add(PostChild(
+                content=child_data['content'], 
+                location=child_data['location'],
+                lat=child_data['lat'],
+                lng=child_data['lng'], 
+                image_data=child_data['image_data'], 
+                category=child_data['category'], 
+                num=int(child_data['num']),
+                post=post
+                ))
+        
+    db.session.commit()
+    return jsonify({'message': current_user.username,})
