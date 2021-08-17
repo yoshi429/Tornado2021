@@ -236,34 +236,23 @@ def user_post_list(user_id):
 # 自分のいいねリスト
 @app.route("/my-good-list", methods=['GET'])
 @login_required
-def my_good_list(user_id):
-    try:
-        user = User.query.filter_by(id=user_id).first()
-        print(user)
-    except:
-        return jsonify({'message': 'userが見つかりません'})
-    posts = user.goods.post
-
-    myGoodPostList = []
-    for post in posts:
-        postChildList = []
-        for child_post in post.post_child:
-            post_child_dict = {
-                "location": child_post.location,
-                "imageData": child_post.image_data,
-                "category": child_post.category,
-                "content": child_post.content
-            }
-            postChildList.append(post_child_dict)
+def my_good_list():
+    goods = Good.query.filter_by(user=current_user)
+    
+    my_good_post_list = []
+    for good in goods:
+        post = good.post
         d = {
-            "userName": post.user.username,
-            "userId": post.user.id,
-            "goodCount": post.goods.count(),
-            "postChildList": postChildList
-        }
-        myGoodPostList.append(d)
-
-    return jsonify({'message': user.username, "myGoodPostList": myGoodPostList})
+            "postId": post.id,
+            "title": post.title,
+            "timestamp": post.timestamp,
+            "goodCount": Good.query.filter_by(post=post).count(),
+            "auther": post.user.username,
+            "posts": PostChild.query.filter_by(post=post).count()
+            }
+        my_good_post_list.append(d)
+        
+    return jsonify({'message': current_user.username, "myGoodPostList": my_good_post_list})
 
 
 # 投稿
