@@ -110,8 +110,11 @@ class PostChild(db.Model):
     content = db.Column(db.Text, nullable=False)
     image_data = db.Column(db.String(20), nullable=False)
     location = db.Column(db.String(255), nullable=False)
+    lat = db.Column(db.Integer, nullable=False) # 緯度 
+    lng = db.Column(db.Integer, nullable=False) # 経度
     category = db.Column(db.String(255), nullable=False)
     post_id = db.Column(db.Integer, db.ForeignKey('post.id'), nullable=False)
+    num = db.Column(db.Integer, nullable=False)
 
     def __repr__(self):
         return f"{self.post.title}-Child"
