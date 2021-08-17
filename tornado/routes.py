@@ -175,23 +175,31 @@ def user_follower_list(user_id):
 @login_required
 def my_follow_user_posts():
     posts = current_user.followed_posts()
-
+    print(posts)
     followPostList = []
     for post in posts:
+        print(post)
         postChildList = []
         for child_post in post.post_child:
+            print(child_post)
             post_child_dict = {
                 "location": child_post.location,
+                "lat": child_post.lat,
+                "lng": child_post.lng,
                 "imageData": child_post.image_data,
                 "category": child_post.category,
-                "content": child_post.content
+                "content": child_post.content,
+                "num": child_post.num
             }
             postChildList.append(post_child_dict)
+
         d = {
             "userName": post.user.username,
             "userId": post.user.id,
-            "goodCount": post.goods.count(),
-            "postChildList": postChildList
+            "postTitle": post.title,
+            "goodCount": Good.query.filter_by(post=post).count(),
+            "postChildList": postChildList,
+            "posts": PostChild.query.filter_by(post=post).count()
         }
         followPostList.append(d)
 
@@ -251,7 +259,7 @@ def my_good_list():
             "posts": PostChild.query.filter_by(post=post).count()
             }
         my_good_post_list.append(d)
-        
+
     return jsonify({'message': current_user.username, "myGoodPostList": my_good_post_list})
 
 
