@@ -1,0 +1,30 @@
+{% extends "layout.html" %}
+{% block content %}
+    {% if current_user == user %}
+    <form action="/user/profile/{{ user.id }}" method="POST" enctype="multipart/form-data">
+        <div>
+            <input type="file" id="image_data" name="image_data" accept="image/jpeg, image/png">
+            <label for="image_data">画像</label>
+        </div>
+        <div>
+            <input type="text" value="{{ profile.content}}" name="content">
+            <label for="content">自己紹介文</label>
+        </div>
+        <div>
+            <input type="text" value="{{ profile.location}}" name="location">
+            <label for="location">場所</label>
+        </div>
+        <input type="submit" value='update'>
+        <div>follow-{{ user.followed.count() }}</div>
+        <div>follower-{{ user.followers.count() }}</div>
+        {% for post in posts %}
+            <div>{{post.title}}</div>
+            <div>{{post.timestamp}}</div>
+        {% for child in post.post_child %}
+            <div>投稿内容：{{child.content}}</div>
+        {% endfor %}
+        {% endfor %}
+    </form>
+    {% else %}
+    {% endif %}
+{% endblock content %}
