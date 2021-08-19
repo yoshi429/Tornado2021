@@ -5,14 +5,15 @@ from flask import current_app
 from tornado.models import Good
 
 
-def save_picture(json_picture):
+def save_picture(picture):
     random_hex = secrets.token_hex(8)
-    _, f_ext = os.path.splitext(json_picture.filename)
+    _, f_ext = os.path.splitext(picture.filename)
     picture_fn = random_hex + f_ext
     picture_path = os.path.join(current_app.root_path, 'static/profile_pictures', picture_fn)
-    
+    print(picture_fn)
+    print(picture_path)
     output_size = (125, 125)
-    i = Image.open(json_picture)
+    i = Image.open(picture)
     i.thumbnail(output_size)
     i.save(picture_path)
     

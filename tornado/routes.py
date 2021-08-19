@@ -57,7 +57,7 @@ def user_login():
 
 
 # ログアウト
-@app.route("/user/logout", methods=['POST'])
+@app.route("/user/logout")
 def user_logout():
     username = current_user.username
     logout_user()
@@ -300,9 +300,15 @@ def post_detail(post_id):
 
 # 投稿リスト
 @app.route("/post/list", methods=['GET'])
-def post_list():
-    posts = Post.query.order_by(Post.timestamp.desc()).all()
+@app.route("/post/list/<string:keyword>", methods=['GET'])
+def post_list(keyword=None):
+    
+    if keyword:
+        posts = Post.query.filter(Post.category.contains(keyword)).all()
+    else:
+        posts = Post.query.order_by(Post.timestamp.desc()).all()
     print(posts)
+
     return jsonify({"postList": list_post(posts)})
 
 
