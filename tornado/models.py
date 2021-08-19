@@ -38,23 +38,31 @@ class User(db.Model, UserMixin):
     def __repr__(self):
         return f"{self.username}-{self.email}"
 
-    # フォローメソッド
     def follow(self, user):
+        """
+        フォローメソッド
+        """
         if not self.is_following(user):
             self.followed.append(user)
 
-    # フォローを外す
     def unfollow(self, user):
+        """
+        フォローを外す
+        """
         if self.is_following(user):
             self.followed.remove(user)
 
-    # フォローしているかどうか
     def is_following(self, user):
+        """
+        フォローしているかどうか
+        """
         return self.followed.filter(
             followers.c.followed_id == user.id).count() > 0
 
-    # フォローしている人の投稿
     def followed_posts(self):
+        """
+        フォローしている人の投稿
+        """
         return Post.query.join(
             followers, (followers.c.followed_id == Post.user_id)).filter(
                 followers.c.follower_id == self.id).order_by(
@@ -101,7 +109,7 @@ class Post(db.Model):
     post_child = db.relationship('PostChild', backref='post', lazy=True)
     
     def __repr__(self):
-        return self.title
+        return f"{self.title}-{self.user.username}"
 
 
 class PostChild(db.Model):
