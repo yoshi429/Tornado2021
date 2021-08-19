@@ -1,0 +1,18 @@
+{% extends "layout.html" %}
+{% block content %}
+    <form action="/user/login" method="POST">
+        <div>
+            <input type="text" id='email' name='email'>
+            <label for="email">email</label>
+        </div>
+        <div>
+            <input type="text" id='password' name='password'>
+            <label for="password">password</label>
+        </div>
+        <div>
+            <input type="checkbox" id='remember' value='remember' name='remember' checked>
+            <label for="remember">remember</label>
+        </div>
+        <input type="submit" value="ログイン">
+    </form>
+{% endblock content %}
