@@ -1,4 +1,5 @@
 from flask import Flask
+from flask_admin import Admin
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
 from flask_login import LoginManager
@@ -13,3 +14,4 @@ login_manager.login_view = 'user_login'
 
 
 from tornado import routes
+from tornado.admin import routes

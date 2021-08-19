@@ -155,3 +155,27 @@ class Comment(db.Model):
 
     def __repr__(self):
         return f"{self.post.title}-{self.content}"
+
+
+class AdminUser(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    login = db.Column(db.String(50), unique=True)
+    password = db.Column(db.String(250))
+
+    @property
+    def is_authenticated(self):
+        return True
+
+    @property
+    def is_active(self):
+        return True
+
+    @property
+    def is_anonymous(self):
+        return False
+
+    def get_id(self):
+        return self.id
+
+    def __unicode__(self):
+        return self.username
