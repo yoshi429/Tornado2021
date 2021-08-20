@@ -1,7 +1,13 @@
 from flask import request, jsonify, redirect, url_for, render_template, request
 from flask_login import login_user, current_user, logout_user, login_required
+
 from tornado import app, db, bcrypt 
-from tornado.models import User, Profile, followers, Post, PostChild, Comment, Good, Category
+from tornado.models import (
+                            User, Profile, followers, 
+                            Post, PostChild, Comment, 
+                            Good, Category, Tag,
+                            tags
+                            )
 from tornado.utils import list_post, post_detail_list, save_picture
 
 
@@ -237,13 +243,25 @@ def my_good_list():
 @app.route("/post/new", methods=['POST'])
 @login_required
 def new_post():
-    post = Post(title=request.form['title'], user=current_user)
+    new_post = Post(title=request.form['title'], user=current_user)
     category = Category.query.filter_by(name=request.form['category']).first()
 
     if category is None:
         print("無効なカテゴリーです。")
         return jsonify({'message': '無効なカテゴリーです。'})
-    
+
+    content = request.form['content']
+    words = content.split()
+
+    # 投稿とタグを中間テーブルで結びつける
+    for word in words:
+        if word[0] == "#":
+            tag = Tag.query.filter_by(name=word).first()
+            if tag is None:
+                tag = Tag(name=word[1:])
+        new_post.post_tags.appned(tag)
+
+
     post_child = PostChild(
                             content=request.form['content'], 
                             location=request.form['location'],
@@ -252,10 +270,10 @@ def new_post():
                             image_data=save_picture(request.form['image_data']), 
                             category=request.form['category'], 
                             num=1,
-                            post=post
+                            post=new_post
                             )
-
-    db.session.add(post)                        
+    
+    db.session.add(new_post)                        
     db.session.add(post_child)
     db.session.commit()
     return jsonify({'message': current_user.username,})
