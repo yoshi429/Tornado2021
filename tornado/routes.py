@@ -1,7 +1,8 @@
 from flask import request, jsonify, redirect, url_for, render_template
 from flask_login import login_user, current_user, logout_user, login_required
+
 from tornado import app, db, bcrypt 
-from tornado.models import User, Profile, followers, Post, PostChild, Comment, Good
+from tornado.models import User, Profile, followers, Post, PostChild, Comment, Good, Category
 from tornado.utils import list_post, post_detail_list
 
 
@@ -298,13 +299,14 @@ def post_detail(post_id):
     return jsonify({"post_detail": post_detail_list(post_childs)})
 
 
-# 投稿リスト
+# 投稿リスト カテゴリー検索
 @app.route("/post/list", methods=['GET'])
-@app.route("/post/list/<string:keyword>", methods=['GET'])
-def post_list(keyword=None):
+@app.route("/post/list/<int:category_id>", methods=['GET'])
+def post_list(category_id=None):
     
-    if keyword:
-        posts = Post.query.filter(Post.category.contains(keyword)).all()
+    if category_id:
+        category = Category.query.filter_by(id=category_id).first()
+        posts = Post.query.filter_by(category=category).all()
     else:
         posts = Post.query.order_by(Post.timestamp.desc()).all()
     print(posts)
@@ -335,3 +337,5 @@ def comment_list(post_id):
         comments_list.append(d)
     
     return jsonify({'commentsList': comments_list})
+
+
