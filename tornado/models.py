@@ -94,6 +94,20 @@ class Profile(db.Model):
 #         return f"from{self.from_user_id.username}to{self.to_user_id.username}"
 
 
+
+class Category(db.Model):
+    """
+    カテゴリー
+    """
+    __tablename__ = 'category'
+    id = db.Column(db.Integer, primary_key=True) 
+    name = db.Column(db.String(255), nullable=False)
+    post = comment = db.relationship('Post', backref='category', lazy=True)
+
+    def __repr__(self):
+        return self.name
+
+
 class Post(db.Model):
     """
     投稿　タイトルなど
@@ -102,7 +116,7 @@ class Post(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(255), nullable=False)
     timestamp = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
-    category = db.Column(db.String(255), nullable=True, default="誰でも")
+    category_id = db.Column(db.Integer, db.ForeignKey('category.id'), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False) 
     comment = db.relationship('Comment', backref='post', lazy=True)
     goods = db.relationship('Good', backref='post', lazy=True)
