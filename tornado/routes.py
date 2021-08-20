@@ -339,3 +339,16 @@ def comment_list(post_id):
     return jsonify({'commentsList': comments_list})
 
 
+# 全体ランキング　カテゴリー別ランキング
+@app.route("/post/ranking", methods=['GET'])
+@app.route("/post/ranking/<int:category_id>", methods=['GET'])
+def ranking_list(category_id=None):
+    
+    if category_id:
+        category = Category.query.filter_by(id=category_id).first()
+        posts = category.post.order_by(Post.goods.desc()).all()
+
+    else:
+        posts = Post.query.order_by(Post.goods.desc()).all()
+
+    return jsonify({"postList": list_post(posts)})
