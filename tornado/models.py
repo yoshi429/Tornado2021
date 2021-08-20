@@ -1,5 +1,6 @@
 from datetime import datetime
 from flask_login import UserMixin
+from sqlalchemy.orm import backref
 from tornado import db, login_manager
 
 
@@ -12,6 +13,13 @@ def load_user(user_id):
 followers = db.Table('followers',
     db.Column('follower_id', db.Integer, db.ForeignKey('user.id')), # フォローした側 
     db.Column('followed_id', db.Integer, db.ForeignKey('user.id')), # フォローされた側
+)
+
+
+# Tag と Post の中間テーブル
+tags = db.Table('tags',
+    db.Column('post_id', db.Integer, db.ForeignKey('post.id')),
+    db.Column('tag_id', db.Integer, db.ForeignKey('tag.id')),
 )
 
 
@@ -84,17 +92,6 @@ class Profile(db.Model):
     
     def __repr__(self):
         return f"{self.user.username}-Profile"
-    
-
-# class FollowRelation(db.Model): 
-#     __tablename__ = 'follow_relation'
-#     id = db.Column(db.Integer, primary_key=True)
-#     from_user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-#     to_user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-
-#     def __repr__(self):
-#         return f"from{self.from_user_id.username}to{self.to_user_id.username}"
-
 
 
 class Category(db.Model):
@@ -103,9 +100,26 @@ class Category(db.Model):
     """
     __tablename__ = 'category'
     id = db.Column(db.Integer, primary_key=True) 
-    name = db.Column(db.String(255), nullable=False)
+    category_name = db.Column(db.String(255), nullable=False)
 
     post = comment = db.relationship('Post', backref='category', lazy=True)
+
+    def __repr__(self):
+        return self.name
+
+
+class Tag(db.Model):
+    """
+    タグ
+    """
+    __tablename__ = 'tag'
+    id = db.Column(db.Integer, primary_key=True) 
+    tag_name = db.Column(db.String(255), nullable=False)
+
+    post_tags = db.relationship(
+                                'Post', secondary=tags,
+                                backref=db.backref('post_tags', lazy='dynamic')
+                                )
 
     def __repr__(self):
         return self.name
@@ -126,7 +140,7 @@ class Post(db.Model):
     comment = db.relationship('Comment', backref='post', lazy=True)
     goods = db.relationship('Good', backref='post', lazy=True)
     post_child = db.relationship('PostChild', backref='post', lazy=True)
-    
+
     def __repr__(self):
         return f"{self.title}-{self.user.username}"
 
