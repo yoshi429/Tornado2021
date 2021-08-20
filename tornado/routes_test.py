@@ -384,3 +384,14 @@ def ranking_list(category_id=None):
         posts = Post.query.order_by(Post.goods.desc()).all()
 
     return jsonify({"postList": list_post(posts)})
+
+
+# 仮
+# タグ検索機能 
+@app.route("/post/ranking/<int:tag_id>", methods=['GET'])
+def ranking_list(tag_id=None):
+    
+    tag = Tag.query.filter_by(id=tag_id).fisrt()
+    posts = tag.tags
+
+    return jsonify({"postList": list_post(posts)})
