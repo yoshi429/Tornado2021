@@ -24,6 +24,7 @@ class User(db.Model, UserMixin):
     username = db.Column(db.String(255), unique=True, nullable=False)
     email = db.Column(db.String(255), unique=True, nullable=False)
     password = db.Column(db.String(60), nullable=False)
+
     followed = db.relationship(
                                 'User', secondary=followers,
                                 primaryjoin=(followers.c.follower_id == id),
@@ -78,6 +79,7 @@ class Profile(db.Model):
     image_data = db.Column(db.String(20), nullable=False, default='default.jpg')
     content = db.Column(db.String(255), nullable=True)
     location = db.Column(db.String(255), nullable=True)
+
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     
     def __repr__(self):
@@ -102,6 +104,7 @@ class Category(db.Model):
     __tablename__ = 'category'
     id = db.Column(db.Integer, primary_key=True) 
     name = db.Column(db.String(255), nullable=False)
+
     post = comment = db.relationship('Post', backref='category', lazy=True)
 
     def __repr__(self):
@@ -116,8 +119,10 @@ class Post(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(255), nullable=False)
     timestamp = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+
     category_id = db.Column(db.Integer, db.ForeignKey('category.id'), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False) 
+
     comment = db.relationship('Comment', backref='post', lazy=True)
     goods = db.relationship('Good', backref='post', lazy=True)
     post_child = db.relationship('PostChild', backref='post', lazy=True)
@@ -136,8 +141,10 @@ class PostChild(db.Model):
     location = db.Column(db.String(255), nullable=False)
     lat = db.Column(db.Integer, nullable=False) # 緯度 
     lng = db.Column(db.Integer, nullable=False) # 経度
-    post_id = db.Column(db.Integer, db.ForeignKey('post.id'), nullable=False)
     num = db.Column(db.Integer, nullable=False)
+
+    post_id = db.Column(db.Integer, db.ForeignKey('post.id'), nullable=False)
+    
 
     def __repr__(self):
         return f"{self.post.title}-{self.num}"
