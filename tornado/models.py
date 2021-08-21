@@ -17,7 +17,7 @@ followers = db.Table('followers',
 
 
 # Tag と Post の中間テーブル
-tags = db.Table('tags',
+post_tags = db.Table('post_tags',
     db.Column('post_id', db.Integer, db.ForeignKey('post.id')),
     db.Column('tag_id', db.Integer, db.ForeignKey('tag.id')),
 )
@@ -116,10 +116,10 @@ class Tag(db.Model):
     id = db.Column(db.Integer, primary_key=True) 
     tag_name = db.Column(db.String(255), nullable=False)
 
-    post_tags = db.relationship(
-                                'Post', secondary=tags,
-                                backref=db.backref('post_tags', lazy='dynamic')
-                                )
+    post = db.relationship(
+                            'Post', secondary=post_tags,
+                            backref=db.backref('tags', lazy='dynamic')
+                            )
 
     def __repr__(self):
         return self.name
@@ -192,25 +192,25 @@ class Comment(db.Model):
         return f"{self.post.title}-{self.content}"
 
 
-class AdminUser(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    login = db.Column(db.String(50), unique=True)
-    password = db.Column(db.String(250))
+# class AdminUser(db.Model):
+#     id = db.Column(db.Integer, primary_key=True)
+#     login = db.Column(db.String(50), unique=True)
+#     password = db.Column(db.String(250))
 
-    @property
-    def is_authenticated(self):
-        return True
+#     @property
+#     def is_authenticated(self):
+#         return True
 
-    @property
-    def is_active(self):
-        return True
+#     @property
+#     def is_active(self):
+#         return True
 
-    @property
-    def is_anonymous(self):
-        return False
+#     @property
+#     def is_anonymous(self):
+#         return False
 
-    def get_id(self):
-        return self.id
+#     def get_id(self):
+#         return self.id
 
-    def __unicode__(self):
-        return self.username
+#     def __unicode__(self):
+#         return self.username
