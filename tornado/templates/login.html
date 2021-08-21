@@ -15,4 +15,23 @@
         </div>
         <input type="submit" value="ログイン">
     </form>
+    <br>
+    <br>
+    <br>
+    <h1>新規登録</h1>
+    <form action="/user/register" method="POST">
+        <div>
+            <input type="text" id='username' name='username'>
+            <label for="email">username</label>
+        </div>
+        <div>
+            <input type="text" id='email' name='email'>
+            <label for="email">email</label>
+        </div>
+        <div>
+            <input type="text" id='password' name='password'>
+            <label for="password">password</label>
+        </div>
+        <input type="submit" value="新規登録">
+    </form>
 {% endblock content %}
