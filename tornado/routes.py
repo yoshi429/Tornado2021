@@ -92,12 +92,6 @@ def profile(user_id):
     except:
         return jsonify({'message': 'userが見つかりません'})
     
-    # if current_user != user:
-    #     print('AA')
-    #     if current_user.is_following(user):
-    #         print('following')
-    #     else: 
-    #         print('unfollwing')
 
     profile = Profile.query.filter_by(user_id=user_id).first()
     posts = Post.query.filter_by(user_id=user_id).all()
@@ -375,12 +369,20 @@ def post_detail(post_id):
 
 # 投稿リスト カテゴリー検索
 @app.route("/post/list", methods=['GET'])
-@app.route("/post/list/<int:category_id>", methods=['GET'])
-def post_list(category_id=None):
+@app.route("/post/list/<string:keyword>", methods=['GET'])
+def post_list(keyword=None):
     
-    if category_id:
-        category = Category.query.filter_by(id=category_id).first()
-        posts = Post.query.filter_by(category=category).all()
+    if keyword:
+        if keyword[0] == '#':
+            tag = Tag.qeury.filter_by(tag_name=keyword[0]).first()
+            posts = tag.post
+        elif keyword[0] == '@':
+            user = User.query.filter_by(usernmae=keyword[1:]).first()
+            posts = Post.query.filter_by(user=user).all()
+        else:
+            category = Category.query.filter_by(category_name=keyword).first()
+            posts = Post.query.filter_by(category=category).all()
+        
     else:
         posts = Post.query.order_by(Post.timestamp.desc()).all()
     print(posts)
@@ -420,10 +422,10 @@ def ranking_list(category_id=None):
     
     if category_id:
         category = Category.query.filter_by(id=category_id).first()
-        posts = category.post.order_by(Post.goods.desc()).all()
+        posts = category.post.order_by(Post.good_user.desc()).all()
 
     else:
-        posts = Post.query.order_by(Post.goods.desc()).all()
+        posts = Post.query.order_by(Post.good_user.desc()).all()
 
     return jsonify({"postList": list_post(posts)})
 
