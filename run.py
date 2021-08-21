@@ -17,7 +17,6 @@ admin.add_view(ModelView(Category, db.session))
 admin.add_view(ModelView(Tag, db.session))
 admin.add_view(ModelView(Post, db.session))
 admin.add_view(ModelView(PostChild, db.session))
-# admin.add_view(ModelView(Good, db.session))
 admin.add_view(ModelView(Comment, db.session))
 # admin.add_view(MyModelView(AdminUser, db.session))
 
