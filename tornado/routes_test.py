@@ -6,7 +6,7 @@ from tornado.models import (
                             User, Profile, followers, 
                             Post, PostChild, Comment, 
                             Good, Category, Tag,
-                            tags
+                            post_tags
                             )
 from tornado.utils import list_post, post_detail_list, save_picture
 
@@ -23,29 +23,35 @@ def home():
 
 
 # ユーザー登録 プロフィール自動登録
-@app.route("/user/register", methods=['POST'])
+@app.route("/user/register", methods=['GET', 'POST'])
 def user_register():
     if current_user.is_authenticated:
         return redirect(url_for('home'))
-    username = request.form['username']
-    email = request.form['email']
-    password = request.form['password']
 
-    if User.query.filter_by(username=username).first():
-        return jsonify({'message': "このユーザーネームは既に登録されています。"}), 404
+    if request.method == 'POST':
+        username = request.form['username']
+        email = request.form['email']
+        password = request.form['password']
 
-    if User.query.filter_by(email=email).first():
-        return jsonify({'message': "このメールアドレスは既に登録されています。"}), 404
+        if User.query.filter_by(username=username).first():
+            return jsonify({'message': "このユーザーネームは既に登録されています。"}), 404
+
+        if User.query.filter_by(email=email).first():
+            return jsonify({'message': "このメールアドレスは既に登録されています。"}), 404
+        
+        hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
+
+        user = User(username=username, email=email, password=hashed_password)
+        profile = Profile(user=user)
+        db.session.add(user)
+        db.session.add(profile)
+        db.session.commit()
+        print('登録されました')
+        return redirect(url_for('home'))
+
+    else:
+        return render_template('register.html')
     
-    hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
-
-    user = User(username=username, email=email, password=hashed_password)
-    profile = Profile(user=user)
-    db.session.add(user)
-    db.session.add(profile)
-    db.session.commit()
-    
-    return jsonify({'message': '登録されました'})
 
 
 # ログイン
@@ -78,9 +84,32 @@ def user_logout():
 
 
 # プロフィール
-@app.route("/user/profile/<int:user_id>", methods=['GET', 'POST'])
-@login_required
+@app.route("/user/profile/<int:user_id>", methods=['GET'])
 def profile(user_id):
+    try:
+        user = User.query.filter_by(id=user_id).first()
+        print(user)
+    except:
+        return jsonify({'message': 'userが見つかりません'})
+    
+    # if current_user != user:
+    #     print('AA')
+    #     if current_user.is_following(user):
+    #         print('following')
+    #     else: 
+    #         print('unfollwing')
+
+    profile = Profile.query.filter_by(user_id=user_id).first()
+    posts = Post.query.filter_by(user_id=user_id).all()
+    image_path = url_for('static', filename='profile_pictures/' + profile.image_data)
+
+    return render_template('profile.html', user=user,  profile=profile, posts=posts, image_path=image_path)
+
+
+# プロフィール編集
+@app.route("/user/profile/<int:user_id>/edit", methods=['GET', 'POST'])
+@login_required
+def edit_profile(user_id):
     try:
         user = User.query.filter_by(id=user_id).first()
         print(user)
@@ -101,17 +130,17 @@ def profile(user_id):
                                         )
             profile.image_data = picture_file
 
-            profile.location = request.form['location']
-            profile.content = request.form['content']
-            db.session.commit()
-            return redirect(url_for('profile', user_id=user_id))
+        profile.location = request.form['location']
+        profile.content = request.form['content']
+        db.session.commit()
+        return redirect(url_for('profile', user_id=user_id))
 
     elif request.method == 'GET':
         print('GET')
         profile = Profile.query.filter_by(user_id=user_id).first()
-        posts = Post.query.filter_by(user_id=user_id).all()
-        return render_template('profile.html', user=user,  profile=profile, posts=posts)
+        image_path = url_for('static', filename='profile_pictures/' + profile.image_data)
 
+        return render_template('edit_profile.html', user=user,  profile=profile, image_path=image_path)
 
 
 # フォロー、フォロー外す機能
@@ -124,8 +153,6 @@ def user_handle_action(user_id):
     except:
         return jsonify({'message': 'のユーザーは存在しません。'})
 
-    action = request.form['action']
-
     if user == current_user:
         return jsonify({'message': '自分をフォローすることは出来ません'})
 
@@ -133,12 +160,12 @@ def user_handle_action(user_id):
     if current_user.is_following(user):
         current_user.unfollow(user)
         db.session.commit()
-        return jsonify({'message': f"{current_user.username}が{user.username}をフォローを外しました"})
     # フォローしていない場合
     else: 
         current_user.follow(user)
         db.session.commit()
-        return jsonify({'message': f"{current_user.username}が{user.username}をフォローしました"})
+
+    return redirect(url_for('profile', user_id=user_id))
 
 
 # フォローリスト
@@ -259,7 +286,7 @@ def new_post():
             tag = Tag.query.filter_by(name=word).first()
             if tag is None:
                 tag = Tag(name=word[1:])
-        new_post.post_tags.appned(tag)
+        new_post.tags.appned(tag)
 
 
     post_child = PostChild(
@@ -346,6 +373,7 @@ def post_list(category_id=None):
 
     return jsonify({"postList": list_post(posts)})
 
+
 # 投稿に対してのコメントリスト
 @app.route("/post/comment/<int:post_id>/list", methods=['GET'])
 @login_required
@@ -388,10 +416,11 @@ def ranking_list(category_id=None):
 
 # 仮
 # タグ検索機能 
-@app.route("/post/ranking/<int:tag_id>", methods=['GET'])
-def ranking_list(tag_id=None):
+# @app.route("/post/ranking", methods=['GET'])
+# @app.route("/post/ranking/<int:tag_id>", methods=['GET'])
+# def ranking_list(tag_id=None):
     
-    tag = Tag.query.filter_by(id=tag_id).fisrt()
-    posts = tag.tags
+#     tag = Tag.query.filter_by(id=tag_id).fisrt()
+#     posts = tag.tags
 
-    return jsonify({"postList": list_post(posts)})
+#     return jsonify({"postList": list_post(posts)})
