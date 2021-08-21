@@ -18,7 +18,7 @@ def test():
 
 @app.route("/home")
 def home():
-    return render_template('home.html')
+    return render_template('login.html')
 
 
 
@@ -62,13 +62,15 @@ def user_login():
         user = User.query.filter_by(email=email).first()
 
         if user and bcrypt.check_password_hash(user.password, password):
+            print("ログインが完了しました")
             login_user(user, remember=remember)
-            return redirect(url_for('home'))
+            return render_template('logout.html')
         else:
             print("メールアドレスかパスワードが間違っています。確認しください。")
             return jsonify({'message': "メールアドレスかパスワードが間違っています。確認しください。"}), 404
     else:
-        return render_template('login.html')
+        print("ログインが完了しました")
+        return render_template('logout.html')
 
 # ログアウト
 @app.route("/user/logout")
@@ -388,6 +390,7 @@ def ranking_list(category_id=None):
 
 # 仮
 # タグ検索機能 
+"""
 @app.route("/post/ranking/<int:tag_id>", methods=['GET'])
 def ranking_list(tag_id=None):
     
@@ -395,3 +398,4 @@ def ranking_list(tag_id=None):
     posts = tag.tags
 
     return jsonify({"postList": list_post(posts)})
+"""
