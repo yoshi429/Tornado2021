@@ -1,9 +1,14 @@
-from flask import request, jsonify, redirect, url_for, render_template
+from flask import request, jsonify, redirect, url_for, render_template, request
 from flask_login import login_user, current_user, logout_user, login_required
 
 from tornado import app, db, bcrypt 
-from tornado.models import User, Profile, followers, Post, PostChild, Comment, Good, Category
-from tornado.utils import list_post, post_detail_list
+from tornado.models import (
+                            User, Profile, followers, 
+                            Post, PostChild, Comment, 
+                            post_goods, Category, Tag,
+                            post_tags
+                            )
+from tornado.utils import list_post, post_detail_list, save_picture
 
 
 @app.route("/")
@@ -18,57 +23,93 @@ def home():
 
 
 # ユーザー登録 プロフィール自動登録
-@app.route("/user/register", methods=['POST'])
+@app.route("/user/register", methods=['GET', 'POST'])
 def user_register():
-    data = request.get_json()
-    username = data['username']
-    email = data['email']
-    password = data['password']
+    if current_user.is_authenticated:
+        return redirect(url_for('home'))
 
-    if User.query.filter_by(username=username).first():
-        return jsonify({'message': "このユーザーネームは既に登録されています。"}), 404
+    if request.method == 'POST':
+        username = request.form['username']
+        email = request.form['email']
+        password = request.form['password']
 
-    if User.query.filter_by(email=email).first():
-        return jsonify({'message': "このメールアドレスは既に登録されています。"}), 404
+        if User.query.filter_by(username=username).first():
+            return jsonify({'message': "このユーザーネームは既に登録されています。"}), 404
+
+        if User.query.filter_by(email=email).first():
+            return jsonify({'message': "このメールアドレスは既に登録されています。"}), 404
+        
+        hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
+
+        user = User(username=username, email=email, password=hashed_password)
+        profile = Profile(user=user)
+        db.session.add(user)
+        db.session.add(profile)
+        db.session.commit()
+        print('登録されました')
+        return redirect(url_for('home'))
+
+    else:
+        return render_template('register.html')
     
-    hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
-    user = User(username=username, email=email, password=hashed_password)
-    profile = Profile(user=user)
-    db.session.add(user)
-    db.session.add(profile)
-    db.session.commit()
-    
-    return jsonify({'message': '登録されました'})
 
 
 # ログイン
-@app.route("/user/login", methods=['POST'])
+@app.route("/user/login", methods=['POST', 'GET'])
 def user_login():
-    data = request.get_json()
-    email = data['email']
-    password = data['password']
-    user = User.query.filter_by(email=email).first()
+    if current_user.is_authenticated:
+        return redirect(url_for('home'))
 
-    if user and bcrypt.check_password_hash(user.password, password):
-        login_user(user, remember=data['remember'])
-        return jsonify({'message': "ログインできました"})
+    if request.method == 'POST':
+        email = request.form['email']
+        password = request.form['password']
+        remember = request.form['remember']
+
+        user = User.query.filter_by(email=email).first()
+
+        if user and bcrypt.check_password_hash(user.password, password):
+            login_user(user, remember=remember)
+            return redirect(url_for('home'))
+        else:
+            print("メールアドレスかパスワードが間違っています。確認しください。")
+            return jsonify({'message': "メールアドレスかパスワードが間違っています。確認しください。"}), 404
     else:
-        return jsonify({'message': "メールアドレスかパスワードが間違っています。確認しください。"}), 404
-
-
+        return render_template('login.html')
 
 # ログアウト
 @app.route("/user/logout")
 def user_logout():
-    username = current_user.username
     logout_user()
-    return jsonify({'message': f"{username}さんログアウトできました"})
+    return redirect(url_for('user_login'))
 
 
 # プロフィール
-@app.route("/user/profile/<int:user_id>", methods=['GET', 'POST'])
-@login_required
+@app.route("/user/profile/<int:user_id>", methods=['GET'])
 def profile(user_id):
+    try:
+        user = User.query.filter_by(id=user_id).first()
+        print(user)
+    except:
+        return jsonify({'message': 'userが見つかりません'})
+    
+    # if current_user != user:
+    #     print('AA')
+    #     if current_user.is_following(user):
+    #         print('following')
+    #     else: 
+    #         print('unfollwing')
+
+    profile = Profile.query.filter_by(user_id=user_id).first()
+    posts = Post.query.filter_by(user_id=user_id).all()
+    image_path = url_for('static', filename='profile_pictures/' + profile.image_data)
+
+    return render_template('profile.html', user=user,  profile=profile, posts=posts, image_path=image_path)
+
+
+# プロフィール編集
+@app.route("/user/profile/<int:user_id>/edit", methods=['GET', 'POST'])
+@login_required
+def edit_profile(user_id):
     try:
         user = User.query.filter_by(id=user_id).first()
         print(user)
@@ -77,22 +118,29 @@ def profile(user_id):
 
     if request.method == 'POST':
         if user != current_user:
+            print('ユーザーの編集はできません')
             return jsonify({'message': 'ユーザーの編集はできません'}), 404
+    
         profile = Profile.query.filter_by(user_id=user_id).first()
-        data = request.get_json()
-        profile.image_data = data['image_data'] or "default.jpg"
-        profile.location = data['location']
-        profile.content = data['content']
+
+        if request.files['image_data']:
+            picture_file = save_picture(
+                                        picture=request.files['image_data'], 
+                                        picture_save_path='static/profile_pictures'
+                                        )
+            profile.image_data = picture_file
+
+        profile.location = request.form['location']
+        profile.content = request.form['content']
         db.session.commit()
-        return jsonify({'message': f"{current_user.username}さんのプロフィールを変更しました"})
+        return redirect(url_for('profile', user_id=user_id))
 
     elif request.method == 'GET':
+        print('GET')
         profile = Profile.query.filter_by(user_id=user_id).first()
-        return jsonify({
-                        'username': profile.user.username, 'email': profile.user.email, 'content': profile.content, 
-                        'image_data': profile.image_data, 'location': profile.location, "follower": profile.user.followers.count(),
-                        "follewed": user.followed.count(),
-                        })
+        image_path = url_for('static', filename='profile_pictures/' + profile.image_data)
+
+        return render_template('edit_profile.html', user=user,  profile=profile, image_path=image_path)
 
 
 # フォロー、フォロー外す機能
@@ -104,24 +152,20 @@ def user_handle_action(user_id):
         print(user)
     except:
         return jsonify({'message': 'のユーザーは存在しません。'})
-    data = request.get_json()
-    action = data['action']
 
     if user == current_user:
         return jsonify({'message': '自分をフォローすることは出来ません'})
 
-    if action == 'follow':
-        current_user.follow(user)
-        db.session.commit()
-        return jsonify({'message': f"{current_user.username}が{user.username}をフォローしました"})
-
-    elif action == 'unfollow':
+    # 既にフォローしている場合
+    if current_user.is_following(user):
         current_user.unfollow(user)
         db.session.commit()
-        return jsonify({'message': f"{current_user.username}が{user.username}をフォローを外しました"})    
-    
-    else:
-        return jsonify({'message': "無効なアクションです。"})
+    # フォローしていない場合
+    else: 
+        current_user.follow(user)
+        db.session.commit()
+
+    return redirect(url_for('profile', user_id=user_id))
 
 
 # フォローリスト
@@ -134,7 +178,8 @@ def user_followed_list(user_id):
         return jsonify({'message': 'userが見つかりません'})
 
     followList = []
-    for user_query in user.followed:
+    users = user.followed
+    for user_query in users:
         d = {
             "userName": user_query.username,
             "userId": user_query.id,
@@ -155,7 +200,8 @@ def user_follower_list(user_id):
         return jsonify({'message': 'userが見つかりません'})
 
     followerList = []
-    for user_query in user.followers:
+    users = user.followers
+    for user_query in users:
         print(user_query.username)
         d = {
             "userName": user_query.username,
@@ -196,8 +242,8 @@ def user_post_list(user_id):
 @app.route("/user/my-good-list", methods=['GET'])
 @login_required
 def my_good_list():
-    goods = Good.query.filter_by(user=current_user)
-    
+    # goods = Good.query.filter_by(user=current_user)
+    goods = Post.query.all()
     my_good_post_list = []
     for good in goods:
         post = good.post
@@ -208,7 +254,7 @@ def my_good_list():
             'timeStamp': post.timestamp,
             'userName': post.user.username,
             'userId': post.user.id,
-            'goodCount': Good.query.filter_by(post=post).count(),
+            # 'goodCount': Good.query.filter_by(post=post).count(),
             'imageData': main_post.image_data,
             'content': main_post.content,
             'location': main_post.location,
@@ -221,28 +267,59 @@ def my_good_list():
 
 
 # 投稿
-@app.route("/post/new", methods=['POST'])
+@app.route("/post/new", methods=['GET', 'POST'])
 @login_required
 def new_post():
-    data = request.get_json()
-    title = data['title']
-    post = Post(title=title, user=current_user)
-    db.session.add(post)
-    
-    for i, child_data in enumerate(data['postChild'], start=1):
-        db.session.add(PostChild(
-                content=child_data['content'], 
-                location=child_data['location'],
-                lat=child_data['lat'],
-                lng=child_data['lng'], 
-                image_data=child_data['image_data'], 
-                category=child_data['category'], 
-                num=int(child_data['num']),
-                post=post
-                ))
+
+    if request.method == 'POST':
+
+        title = request.form['title']
+        contents=request.form['content'] 
+        location=request.form['location']
+        lat=request.form['lat']
+        lng=request.form['lng'] 
+        image_data=request.files['image_data'] 
+        category=request.form['category']
+
         
-    db.session.commit()
-    return jsonify({'message': current_user.username,})
+        category = Category.query.filter_by(category_name=category).first()
+        if category is None:
+            print("無効なカテゴリーです。")
+            return jsonify({'message': '無効なカテゴリーです。'})
+
+
+        new_post = Post(title=title, user=current_user, category=category)
+        # 投稿とタグを中間テーブルで結びつける
+        
+        words = contents.split()
+        for word in words:
+            if word[0] == "#":
+                tag = Tag.query.filter_by(tag_name=word).first()
+                if tag is None:
+                    tag = Tag(tag_name=word[1:])
+                new_post.tags.append(tag)  #
+
+
+        post_child = PostChild(
+                                content=contents, 
+                                location=location,
+                                lat=float(lat),
+                                lng=float(lng), 
+                                image_data=save_picture(
+                                    picture=image_data, 
+                                    picture_save_path='static/post_pictures'
+                                            ), 
+                                num=1,
+                                post=new_post
+                                )
+        
+        db.session.add(new_post)                        
+        db.session.add(post_child)
+        db.session.commit()
+        return redirect(url_for('post_list'))
+
+    else:
+        return render_template('new_post.html')
 
 
 # 投稿に対してのコメント
@@ -254,8 +331,7 @@ def new_comment(post_id):
     if post is None:
         return jsonify({'message': "この投稿は存在しません。", "status_code": 404}) ,404
     
-    data = request.get_json()
-    content = data['content']
+    content = request.form['content']
     
     db.session.add(Comment(post=post, user=current_user, content=content))
     db.session.commit()
@@ -267,22 +343,20 @@ def new_comment(post_id):
 @login_required
 def post_handle_good(post_id):
     post = Post.query.filter_by(id=post_id).first()
-
+    print(post.title)
     if post is None:
         return jsonify({'message': "この投稿は存在しません。", "status_code": 404}) ,404
-    
-    good = Good.query.filter_by(user=current_user, post=post).first()
-    
-    if good is None:
-        db.session.add(Good(user=current_user, post=post))
-        db.session.commit()
-        return jsonify({'message': f"{current_user.username}が{post.title}にいいねしました。",})
-    elif good:
-        db.session.delete(good)
-        db.session.commit()
-        return jsonify({'message': f"{current_user.username}が{post.title}にいいねを外しました。",})    
+
+    # 既にいいねしているかどうか
+    if  post.good_user.filter(post_goods.c.user_id == current_user.id).count() > 0:
+        # remove good
+        current_user.good_post.remove(post)
     else:
-        return jsonify({'message': "無効なアクションです。",})
+        # add good
+        current_user.good_post.append(post)
+
+    db.session.commit()
+    return redirect(url_for('post_list'))
 
 
 # 投稿の詳細画面
@@ -311,7 +385,7 @@ def post_list(category_id=None):
         posts = Post.query.order_by(Post.timestamp.desc()).all()
     print(posts)
 
-    return jsonify({"postList": list_post(posts)})
+    return render_template('post_list.html', posts=posts)
 
 
 # 投稿に対してのコメントリスト
@@ -352,3 +426,4 @@ def ranking_list(category_id=None):
         posts = Post.query.order_by(Post.goods.desc()).all()
 
     return jsonify({"postList": list_post(posts)})
+
