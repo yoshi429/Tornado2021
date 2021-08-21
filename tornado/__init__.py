@@ -12,6 +12,5 @@ login_manager = LoginManager(app)
 login_manager.login_view = 'user_login'
 
 
-# from tornado import routes
-from tornado import routes_test
+from tornado import routes
 # from tornado.admin import routes
