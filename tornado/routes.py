@@ -1,3 +1,4 @@
+import re
 from flask import request, jsonify, redirect, url_for, render_template, request
 from flask_login import login_user, current_user, logout_user, login_required
 
@@ -50,7 +51,7 @@ def user_register():
         return redirect(url_for('home'))
 
     else:
-        return render_template('register.html')
+        return render_template('user/register.html')
     
 
 
@@ -74,7 +75,7 @@ def user_login():
             print("メールアドレスかパスワードが間違っています。確認しください。")
             return jsonify({'message': "メールアドレスかパスワードが間違っています。確認しください。"}), 404
     else:
-        return render_template('login.html')
+        return render_template('user/login.html')
 
 # ログアウト
 @app.route("/user/logout")
@@ -97,7 +98,7 @@ def profile(user_id):
     posts = Post.query.filter_by(user_id=user_id).all()
     image_path = url_for('static', filename='profile_pictures/' + profile.image_data)
 
-    return render_template('profile.html', user=user,  profile=profile, posts=posts, image_path=image_path)
+    return render_template('user/profile.html', user=user,  profile=profile, posts=posts, image_path=image_path)
 
 
 # プロフィール編集
@@ -124,7 +125,6 @@ def edit_profile(user_id):
                                         )
             profile.image_data = picture_file
 
-        profile.location = request.form['location']
         profile.content = request.form['content']
         db.session.commit()
         return redirect(url_for('profile', user_id=user_id))
@@ -134,7 +134,7 @@ def edit_profile(user_id):
         profile = Profile.query.filter_by(user_id=user_id).first()
         image_path = url_for('static', filename='profile_pictures/' + profile.image_data)
 
-        return render_template('edit_profile.html', user=user,  profile=profile, image_path=image_path)
+        return render_template('user/edit_profile.html', user=user,  profile=profile, image_path=image_path)
 
 
 # フォロー、フォロー外す機能
@@ -173,7 +173,7 @@ def user_followed_list(user_id):
 
     followed_users = user.followed
 
-    return render_template('follower_follow_list.html', users=followed_users)
+    return render_template('user/user_list.html', users=followed_users)
 
 
 # フォローワーリスト
@@ -187,7 +187,7 @@ def user_follower_list(user_id):
 
     followers_users = user.followers
 
-    return render_template('follower_follow_list.html', users=followers_users)
+    return render_template('user/user_list.html', users=followers_users)
 
 
 # 自分がフォローしている人の投稿リスト
@@ -196,7 +196,7 @@ def user_follower_list(user_id):
 def my_follow_user_posts():
     posts = current_user.followed_posts()
     print(posts)
-    return render_template('post_list.html', posts=posts)
+    return render_template('post/post_list.html', posts=posts)
 
 
 #　仮
@@ -220,7 +220,7 @@ def my_good_list():
     
     posts = current_user.good_post
 
-    return render_template('post_list.html', posts=posts)
+    return render_template('post/post_list.html', posts=posts)
 
 
 # 投稿
@@ -276,7 +276,7 @@ def new_post():
         return redirect(url_for('post_list'))
 
     else:
-        return render_template('new_post.html')
+        return render_template('post/new_post.html')
 
 
 # 投稿に対してのコメント
@@ -331,26 +331,32 @@ def post_detail(post_id):
 
 
 # 投稿リスト カテゴリー検索
-@app.route("/post/list", methods=['GET'])
-@app.route("/post/list/<string:keyword>", methods=['GET'])
-def post_list(keyword=None):
-    
-    if keyword:
+@app.route("/post/list", methods=['GET', 'POST'])
+def post_list():
+
+    keyword = ''
+    posts = None
+
+    if request.method == 'POST':
+        keyword = request.form['keyword']
+        print(keyword)
         if keyword[0] == '#':
-            tag = Tag.qeury.filter_by(tag_name=keyword[1:]).first()
-            posts = tag.post
+            tag = Tag.query.filter_by(tag_name=keyword[1:]).first()
+            if tag is not None:
+                posts = tag.post
         elif keyword[0] == '@':
-            user = User.query.filter_by(usernmae=keyword[1:]).first()
-            posts = Post.query.filter_by(user=user).all()
+            user = User.query.filter_by(username=keyword[1:]).first()
+            if user is not None:
+                posts = user.posts
         else:
             category = Category.query.filter_by(category_name=keyword).first()
-            posts = Post.query.filter_by(category=category).all()
-        
+            if category is not None:
+                posts = category.post
     else:
         posts = Post.query.order_by(Post.timestamp.desc()).all()
     print(posts)
 
-    return render_template('post_list.html', posts=posts)
+    return render_template('post/post_list.html', posts=posts, keyword=keyword)
 
 
 # 投稿に対してのコメントリスト
@@ -378,6 +384,21 @@ def comment_list(post_id):
     return jsonify({'commentsList': comments_list})
 
 
+# 投稿に対してのいいねのユーザーリスト
+@app.route("/post/good/<int:post_id>/list", methods=['GET'])
+@login_required
+def good_user_list(post_id):
+    post = Post.query.filter_by(id=post_id).first()
+
+    if post is None:
+        print('投稿が見つかりません。')
+        return redirect('post_list')
+
+    users = post.good_user
+
+    return render_template('user/user_list.html', users=users)
+
+
 # 全体ランキング　カテゴリー別ランキング
 @app.route("/post/ranking", methods=['GET'])
 @app.route("/post/ranking/<int:category_id>", methods=['GET'])
@@ -385,11 +406,12 @@ def ranking_list(category_id=None):
     
     if category_id:
         category = Category.query.filter_by(id=category_id).first()
-        posts = category.post.order_by(Post.timestamp.desc()).all()
+        if category is not None:
+            posts = category.post.order_by(Post.timestamp.desc()).all()
 
     else:
-        posts = Post.query.order_by(Post.timestamp).all()
+        posts = Post.query.order_by(Post.timestamp.desc()).all()
 
     print(posts)
 
-    return render_template('ranking.html', posts=posts)
+    return render_template('post/ranking.html', posts=posts)
