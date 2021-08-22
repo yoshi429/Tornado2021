@@ -1,0 +1,6 @@
+{% extends "layout.html" %}
+{% block content %} 
+{% with users=users %}
+{% include 'snippets/users.html'%}
+{% endwith %}
+{% endblock content %}

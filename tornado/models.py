@@ -42,19 +42,20 @@ class User(db.Model, UserMixin):
     password = db.Column(db.String(60), nullable=False)
     timestamp = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
+    profile_id = db.relationship("Profile", backref='user', uselist=False)
+    posts = db.relationship('Post', backref='user', lazy=True)
+    comments = db.relationship('Comment', backref='user', lazy=True)
+
     followed = db.relationship(
                                 'User', secondary=followers,
                                 primaryjoin=(followers.c.follower_id == id),
                                 secondaryjoin=(followers.c.followed_id == id), 
                                 backref=db.backref('followers', lazy='dynamic'), lazy='dynamic'
                                 )
-    profile_id = db.relationship("Profile", backref='user', uselist=False)
-    posts = db.relationship('Post', backref='user', lazy=True)
     good_post = db.relationship(
                             'Post', secondary=post_goods,
                             backref=db.backref('good_user', lazy='dynamic')
                             )
-    comments = db.relationship('Comment', backref='user', lazy=True)
 
     def __repr__(self):
         return f"{self.username}-{self.email}"
@@ -97,8 +98,7 @@ class Profile(db.Model):
     __tablename__ = 'profile'
     id = db.Column(db.Integer, primary_key=True)
     image_data = db.Column(db.String(20), nullable=False, default='default.jpg')
-    content = db.Column(db.String(255), nullable=True)
-    location = db.Column(db.String(255), nullable=True)
+    content = db.Column(db.String(255), nullable=False, default='')
 
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     
@@ -145,17 +145,13 @@ class Post(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(255), nullable=False)
     timestamp = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    good_count = db.Column(db.Integer, nullable=False, default=0)
 
     category_id = db.Column(db.Integer, db.ForeignKey('category.id'), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False) 
 
     comment = db.relationship('Comment', backref='post', lazy=True)
     post_child = db.relationship('PostChild', backref='post', lazy=True)
-
-    # liked_user = db.relationship(
-    #                         'User', secondary=post_goods,
-    #                         backref=db.backref('liked_post', lazy='dynamic')
-    #                         )
 
     def __repr__(self):
         return f"{self.title}-{self.user.username}"
@@ -196,25 +192,3 @@ class Comment(db.Model):
         return f"{self.post.title}-{self.content}"
 
 
-# class AdminUser(db.Model):
-#     id = db.Column(db.Integer, primary_key=True)
-#     login = db.Column(db.String(50), unique=True)
-#     password = db.Column(db.String(250))
-
-#     @property
-#     def is_authenticated(self):
-#         return True
-
-#     @property
-#     def is_active(self):
-#         return True
-
-#     @property
-#     def is_anonymous(self):
-#         return False
-
-#     def get_id(self):
-#         return self.id
-
-#     def __unicode__(self):
-#         return self.username
