@@ -29,6 +29,12 @@
             <li class="nav-item">
               <a class="nav-link active" aria-current="page" href="{{ url_for('profile', user_id=current_user.id) }}">Profile</a>
             </li>
+            <li class="nav-item">
+              <a class="nav-link active" aria-current="page" href="{{ url_for('new_post') }}">New Post</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link active" aria-current="page" href="{{ url_for('my_good_list') }}">GoodList</a>
+            </li>
             {% else %}
             <li class="nav-item">
               <a class="nav-link" href="{{ url_for('user_login') }}">Log in</a>
@@ -37,6 +43,12 @@
               <a class="nav-link" href="{{ url_for('user_register') }}">Register</a>
             </li>
             {% endif %}
+            <li class="nav-item">
+              <a class="nav-link" href="{{ url_for('post_list') }}">Post_list</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{{ url_for('ranking_list') }}">ranking</a>
+            </li>
           </ul>
         </div>
       </div>

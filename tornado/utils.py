@@ -2,7 +2,7 @@ import os
 import secrets
 from PIL import Image
 from flask import current_app
-from tornado.models import Good
+from tornado.models import post_goods
 
 
 def save_picture(picture, picture_save_path):
@@ -12,9 +12,9 @@ def save_picture(picture, picture_save_path):
     picture_path = os.path.join(current_app.root_path, picture_save_path, picture_fn)
     print(picture_fn)
     print(picture_path)
-    output_size = (125, 125)
+    # output_size = (125, 125)
     i = Image.open(picture)
-    i.thumbnail(output_size)
+    # i.thumbnail(output_size)
     i.save(picture_path)
     
     return picture_fn
@@ -32,7 +32,7 @@ def list_post(posts):
             'timeStamp': post.timestamp,
             'userName': post.user.username,
             'userId': post.user.id,
-            'goodCount': Good.query.filter_by(post=post).count(),
+            # 'goodCount': Good.query.filter_by(post=post).count(),
             'imageData': main_post.image_data,
             'content': main_post.content,
             'location': main_post.location,

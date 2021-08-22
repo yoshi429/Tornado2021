@@ -13,13 +13,21 @@ def load_user(user_id):
 followers = db.Table('followers',
     db.Column('follower_id', db.Integer, db.ForeignKey('user.id')), # フォローした側 
     db.Column('followed_id', db.Integer, db.ForeignKey('user.id')), # フォローされた側
+    db.Column('timestamp', db.DateTime, nullable=False, default=datetime.utcnow),
 )
 
 
 # Tag と Post の中間テーブル
-tags = db.Table('tags',
+post_tags = db.Table('post_tags',
     db.Column('post_id', db.Integer, db.ForeignKey('post.id')),
     db.Column('tag_id', db.Integer, db.ForeignKey('tag.id')),
+)
+
+# goodテーブル
+post_goods = db.Table('post_goods',
+    db.Column('post_id', db.Integer, db.ForeignKey('post.id')),
+    db.Column('user_id', db.Integer, db.ForeignKey('user.id')),
+    db.Column('timestamp', db.DateTime, nullable=False, default=datetime.utcnow),
 )
 
 
@@ -32,6 +40,7 @@ class User(db.Model, UserMixin):
     username = db.Column(db.String(255), unique=True, nullable=False)
     email = db.Column(db.String(255), unique=True, nullable=False)
     password = db.Column(db.String(60), nullable=False)
+    timestamp = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
     followed = db.relationship(
                                 'User', secondary=followers,
@@ -41,7 +50,10 @@ class User(db.Model, UserMixin):
                                 )
     profile_id = db.relationship("Profile", backref='user', uselist=False)
     posts = db.relationship('Post', backref='user', lazy=True)
-    goods = db.relationship('Good', backref='user', lazy=True)
+    good_post = db.relationship(
+                            'Post', secondary=post_goods,
+                            backref=db.backref('good_user', lazy='dynamic')
+                            )
     comments = db.relationship('Comment', backref='user', lazy=True)
 
     def __repr__(self):
@@ -102,10 +114,10 @@ class Category(db.Model):
     id = db.Column(db.Integer, primary_key=True) 
     category_name = db.Column(db.String(255), nullable=False)
 
-    post = comment = db.relationship('Post', backref='category', lazy=True)
+    post = db.relationship('Post', backref='category', lazy=True)
 
     def __repr__(self):
-        return self.name
+        return self.category_name
 
 
 class Tag(db.Model):
@@ -116,13 +128,13 @@ class Tag(db.Model):
     id = db.Column(db.Integer, primary_key=True) 
     tag_name = db.Column(db.String(255), nullable=False)
 
-    post_tags = db.relationship(
-                                'Post', secondary=tags,
-                                backref=db.backref('post_tags', lazy='dynamic')
-                                )
+    post = db.relationship(
+                            'Post', secondary=post_tags,
+                            backref=db.backref('tags', lazy='dynamic')
+                            )
 
     def __repr__(self):
-        return self.name
+        return self.tag_name
 
 
 class Post(db.Model):
@@ -138,8 +150,12 @@ class Post(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False) 
 
     comment = db.relationship('Comment', backref='post', lazy=True)
-    goods = db.relationship('Good', backref='post', lazy=True)
     post_child = db.relationship('PostChild', backref='post', lazy=True)
+
+    # liked_user = db.relationship(
+    #                         'User', secondary=post_goods,
+    #                         backref=db.backref('liked_post', lazy='dynamic')
+    #                         )
 
     def __repr__(self):
         return f"{self.title}-{self.user.username}"
@@ -153,8 +169,8 @@ class PostChild(db.Model):
     content = db.Column(db.Text, nullable=False)
     image_data = db.Column(db.String(20), nullable=False)
     location = db.Column(db.String(255), nullable=False)
-    lat = db.Column(db.Integer, nullable=False) # 緯度 
-    lng = db.Column(db.Integer, nullable=False) # 経度
+    lat = db.Column(db.Float, nullable=False) # 緯度 
+    lng = db.Column(db.Float, nullable=False) # 経度
     num = db.Column(db.Integer, nullable=False)
 
     post_id = db.Column(db.Integer, db.ForeignKey('post.id'), nullable=False)
@@ -162,19 +178,6 @@ class PostChild(db.Model):
 
     def __repr__(self):
         return f"{self.post.title}-{self.num}"
-    
-
-class Good(db.Model): 
-    """
-    投稿に対するいいね
-    """
-    __tablename__ = 'good'
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    post_id = db.Column(db.Integer, db.ForeignKey('post.id'), nullable=False)
-
-    def __repr__(self):
-        return f"{self.user.username}-{self.post.title}-Good"
 
 
 class Comment(db.Model):
@@ -186,31 +189,32 @@ class Comment(db.Model):
     content = db.Column(db.String(255), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     post_id = db.Column(db.Integer, db.ForeignKey('post.id'), nullable=False)
+    timestamp = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     
 
     def __repr__(self):
         return f"{self.post.title}-{self.content}"
 
 
-class AdminUser(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    login = db.Column(db.String(50), unique=True)
-    password = db.Column(db.String(250))
+# class AdminUser(db.Model):
+#     id = db.Column(db.Integer, primary_key=True)
+#     login = db.Column(db.String(50), unique=True)
+#     password = db.Column(db.String(250))
 
-    @property
-    def is_authenticated(self):
-        return True
+#     @property
+#     def is_authenticated(self):
+#         return True
 
-    @property
-    def is_active(self):
-        return True
+#     @property
+#     def is_active(self):
+#         return True
 
-    @property
-    def is_anonymous(self):
-        return False
+#     @property
+#     def is_anonymous(self):
+#         return False
 
-    def get_id(self):
-        return self.id
+#     def get_id(self):
+#         return self.id
 
-    def __unicode__(self):
-        return self.username
+#     def __unicode__(self):
+#         return self.username

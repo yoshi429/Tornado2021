@@ -1,0 +1,6 @@
+{% extends "layout.html" %}
+{% block content %}
+{% with posts=posts %} 
+{% include 'post_list.html' %}
+{% endwith %}
+{% endblock content %}

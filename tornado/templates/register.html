@@ -1,0 +1,18 @@
+{% extends "layout.html" %}
+{% block content %}
+    <form action="/user/register" method="POST">
+        <div>
+            <input type="text" id='email' name='email'>
+            <label for="email">email</label>
+        </div>
+        <div>
+            <input type="text" id='username' name='username'>
+            <label for="username">username</label>
+        </div>
+        <div>
+            <input type="text" id='password' name='password'>
+            <label for="password">password</label>
+        </div>
+        <input type="submit" value="登録">
+    </form>
+{% endblock content %}

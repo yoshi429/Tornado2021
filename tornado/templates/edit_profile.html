@@ -1,0 +1,20 @@
+{% extends "layout.html" %}
+{% block content %}
+    <img class="rounded-circle account-img" src="{{ image_path }}">
+    <div>{{ user.username }}さん</div>
+    <form action="/user/profile/{{ user.id }}/edit" method="POST" enctype="multipart/form-data">
+        <div>
+            <input type="file" id="image_data" name="image_data" accept="image/jpeg, image/png">
+            <label for="image_data">画像</label>
+        </div>
+        <div>
+            <input type="text" value="{{ profile.content}}" name="content">
+            <label for="content">自己紹介文</label>
+        </div>
+        <div>
+            <input type="text" value="{{ profile.location}}" name="location">
+            <label for="location">場所</label>
+        </div>
+        <input type="submit" value='update'>
+    </form>
+{% endblock content %}
