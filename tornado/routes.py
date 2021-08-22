@@ -87,10 +87,8 @@ def user_logout():
 # プロフィール
 @app.route("/user/profile/<int:user_id>", methods=['GET'])
 def profile(user_id):
-    try:
-        user = User.query.filter_by(id=user_id).first()
-        print(user)
-    except:
+    user = User.query.filter_by(id=user_id).first()
+    if user is None:
         return jsonify({'message': 'userが見つかりません'})
     
 
@@ -105,10 +103,8 @@ def profile(user_id):
 @app.route("/user/profile/<int:user_id>/edit", methods=['GET', 'POST'])
 @login_required
 def edit_profile(user_id):
-    try:
-        user = User.query.filter_by(id=user_id).first()
-        print(user)
-    except:
+    user = User.query.filter_by(id=user_id).first()
+    if user is None:
         return jsonify({'message': 'userが見つかりません'})
 
     if request.method == 'POST':
@@ -141,11 +137,9 @@ def edit_profile(user_id):
 @app.route("/user/action/<int:user_id>", methods=['POST'])
 @login_required
 def user_handle_action(user_id):
-    try:
-        user = User.query.filter_by(id=user_id).first()
-        print(user)
-    except:
-        return jsonify({'message': 'のユーザーは存在しません。'})
+    user = User.query.filter_by(id=user_id).first()
+    if user is None:
+        return jsonify({'message': 'userが見つかりません'})
 
     if user == current_user:
         return jsonify({'message': '自分をフォローすることは出来ません'})
@@ -165,10 +159,8 @@ def user_handle_action(user_id):
 # フォローリスト
 @app.route("/user/follow-list/<int:user_id>", methods=['GET'])
 def user_followed_list(user_id):
-    try:
-        user = User.query.filter_by(id=user_id).first()
-        print(user)
-    except:
+    user = User.query.filter_by(id=user_id).first()
+    if user is None:
         return jsonify({'message': 'userが見つかりません'})
 
     followed_users = user.followed
@@ -179,10 +171,8 @@ def user_followed_list(user_id):
 # フォローワーリスト
 @app.route("/user/follower-list/<int:user_id>", methods=['GET'])
 def user_follower_list(user_id):
-    try:
-        user = User.query.filter_by(id=user_id).first()
-        print(user)
-    except:
+    user = User.query.filter_by(id=user_id).first()
+    if user is None:
         return jsonify({'message': 'userが見つかりません'})
 
     followers_users = user.followers
@@ -203,10 +193,8 @@ def my_follow_user_posts():
 # ユーザー個人の投稿
 @app.route("/user/post-list/<int:user_id>", methods=['GET'])
 def user_post_list(user_id):
-    try:
-        user = User.query.filter_by(id=user_id).first()
-        print(user)
-    except:
+    user = User.query.filter_by(id=user_id).first()
+    if user is None:
         return jsonify({'message': 'userが見つかりません'})
     posts = user.posts
     print(posts)
@@ -312,6 +300,7 @@ def post_handle_good(post_id):
         # add good
         current_user.good_post.append(post)
 
+    post.good_count = post.good_user.count()
     db.session.commit()
     return redirect(url_for('post_list'))
 
@@ -320,6 +309,10 @@ def post_handle_good(post_id):
 @app.route("/post/<int:post_id>", methods=['GET'])
 def post_detail(post_id):
     post = Post.query.filter_by(id=post_id).first()
+
+    if post is None:
+        print('投稿が見つかりません。')
+        return redirect('post_list')
 
     if post is None:
         return jsonify({'message': "この投稿は存在しません。", "status_code": 404}) ,404
@@ -364,6 +357,10 @@ def post_list():
 @login_required
 def comment_list(post_id):
     post = Post.query.filter_by(id=post_id).first()
+
+    if post is None:
+        print('投稿が見つかりません。')
+        return redirect('post_list')
     comments = post.comment
     print(comments)
     if post is None:
@@ -407,10 +404,10 @@ def ranking_list(category_id=None):
     if category_id:
         category = Category.query.filter_by(id=category_id).first()
         if category is not None:
-            posts = category.post.order_by(Post.timestamp.desc()).all()
+            posts = category.post.order_by(Post.good_count.desc()).all()
 
     else:
-        posts = Post.query.order_by(Post.timestamp.desc()).all()
+        posts = Post.query.order_by(Post.good_count.desc()).all()
 
     print(posts)
 

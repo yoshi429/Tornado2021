@@ -4,14 +4,9 @@ from flask_login import current_user, login_user, logout_user
 from flask_admin.contrib import sqla
 from flask_admin import helpers, expose
 
-from tornado import login_manager, db, bcrypt
-from tornado.models import AdminUser
+from tornado import db, bcrypt
+from tornado.models import User
 from tornado.admin.forms import LoginForm, RegistrationForm
-
-
-@login_manager.user_loader
-def load_user(user_id):
-    return db.session.query(AdminUser).get(user_id)
 
 
 class MyModelView(sqla.ModelView):
@@ -20,13 +15,13 @@ class MyModelView(sqla.ModelView):
 
 
 class MyAdminIndexView(admin.AdminIndexView):
-    @expose('/')
+    @expose('/admin')
     def index(self):
         if not current_user.is_authenticated:
             return redirect(url_for('.login_view'))
         return super(MyAdminIndexView, self).index()
 
-    @expose('/login/', methods=('GET', 'POST'))
+    @expose('admin/login/', methods=('GET', 'POST'))
     def login_view(self):
         form = LoginForm(request.form)
         if helpers.validate_form_on_submit(form):
@@ -40,11 +35,11 @@ class MyAdminIndexView(admin.AdminIndexView):
         self._template_args['link'] = link
         return super(MyAdminIndexView, self).index()
 
-    @expose('/register/', methods=('GET', 'POST'))
+    @expose('admin/register/', methods=('GET', 'POST'))
     def register_view(self):
         form = RegistrationForm(request.form)
         if helpers.validate_form_on_submit(form):
-            user = AdminUser()
+            user = User()
 
             form.populate_obj(user)
             user.password = bcrypt.generate_password_hash(form.password.data)
@@ -57,7 +52,7 @@ class MyAdminIndexView(admin.AdminIndexView):
         self._template_args['link'] = link
         return super(MyAdminIndexView, self).index()
 
-    @expose('/logout/')
+    @expose('admin/logout/')
     def logout_view(self):
         logout_user()
         return redirect(url_for('.index'))
