@@ -1,8 +1,8 @@
 {% extends "layout.html" %}
 {% block content %}
-    <img src="{{image_path}}" class="card-img-top">
+    <img src="{{image_path}}" class="card-img-top w-25 p-3 h-25 d-inline-block">
     <div>{{ user.username }}-{{ user.email }}</div>
-    <div>紹介文{{ user.profile_id.content }}-場所{{ profile.location }}</div>
+    <div>紹介文{{ user.profile_id.content }}</div>
     <div><a href="{{ url_for('user_follower_list', user_id=user.id)}}">follower-{{ user.followers.count() }}</a></div>
     <div> <a href="{{ url_for('user_followed_list', user_id=user.id) }}">follow-{{ user.followed.count() }}</a></div>
 
@@ -18,20 +18,7 @@
         </form>
     {% endif %}
 
-    {% for post in posts %}
-        {% for child in post.post_child %}
-            <div class="card" style="width: 18rem;">
-                <img src="/static/post_pictures/{{child.image_data}}" class="card-img-top">
-                <div class="card-body">
-                    <h5 class="card-title">{{post.title}}</h5>
-                    <p class="card-text">{{child.content}}</p>
-                    <form action="{{ url_for('post_handle_good', post_id=post.id)}}" method="POST">
-                        <button class="btn btn-info">
-                            Good{{ post.good_user.count() }}
-                        </button>
-                    </form>
-                </div>
-            </div>
-        {% endfor %}
-    {% endfor %}
+    {% with posts=posts %}
+    {% include 'snippets/posts.html'%}
+    {% endwith %}
 {% endblock content %}

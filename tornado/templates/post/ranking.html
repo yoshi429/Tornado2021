@@ -1,0 +1,26 @@
+{% extends "layout.html" %}
+{% block content %}
+{% for post in posts %}
+    {% for child in post.post_child %}
+        <div class="card" style="width: 18rem;">
+            <img src="/static/post_pictures/{{child.image_data}}" class="card-img-top">
+            <div class="card-body">
+                <h5 class="card-title">{{post.title}}</h5>
+                <p class="card-text">{{child.content}}</p>
+                <form action="{{ url_for('post_handle_good', post_id=post.id)}}" method="POST">
+                    <button class="btn btn-info">
+                        Good{{ post.good_user.count() }}
+                    </button>
+                </form>
+                <form action="{{ url_for('new_comment', post_id=post.id) }}" method="POST">
+                    <input type="text" name='content' id='content' placeholder="comment...">
+                    <input type="submit" value='送信'>
+                </form>
+                {% for comment in post.comment %}
+                    <div>@{{ comment.user.username }}さん-{{ comment.content }}</div>
+                {% endfor%}
+            </div>
+        </div>
+    {% endfor %}
+{% endfor %}
+{% endblock content %}
