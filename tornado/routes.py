@@ -171,17 +171,9 @@ def user_followed_list(user_id):
     except:
         return jsonify({'message': 'userが見つかりません'})
 
-    followList = []
-    users = user.followed
-    for user_query in users:
-        d = {
-            "userName": user_query.username,
-            "userId": user_query.id,
-            "imageData": user_query.profile_id.image_data
-        }
-        followList.append(d)
+    followed_users = user.followed
 
-    return jsonify({'message': user.username, "follow_count": user.followed.count(), "followList": followList})
+    return render_template('follower_follow_list.html', users=followed_users)
 
 
 # フォローワーリスト
@@ -193,28 +185,18 @@ def user_follower_list(user_id):
     except:
         return jsonify({'message': 'userが見つかりません'})
 
-    followerList = []
-    users = user.followers
-    for user_query in users:
-        print(user_query.username)
-        d = {
-            "userName": user_query.username,
-            "userId": user_query.id,
-            "imageData": user_query.profile_id.image_data
-        }
-        followerList.append(d)
-    
-    return jsonify({'message': user.username, "follower_count": user.followers.count(), "followerList": followerList})
+    followers_users = user.followers
+
+    return render_template('follower_follow_list.html', users=followers_users)
 
 
-#　仮
 # 自分がフォローしている人の投稿リスト
 @app.route("/user/follow-posts", methods=['GET'])
 @login_required
 def my_follow_user_posts():
     posts = current_user.followed_posts()
     print(posts)
-    return jsonify({'message': current_user.username, "followPostList": list_post(posts)})
+    return render_template('post_list.html', posts=posts)
 
 
 #　仮
@@ -231,33 +213,14 @@ def user_post_list(user_id):
     return jsonify({'message': user.username, "userPostList": list_post(posts)})
 
 
-#　仮
 # 自分のいいねリスト
 @app.route("/user/my-good-list", methods=['GET'])
 @login_required
 def my_good_list():
-    # goods = Good.query.filter_by(user=current_user)
-    goods = Post.query.all()
-    my_good_post_list = []
-    for good in goods:
-        post = good.post
-        main_post = post.post_child[0]
-        d = {
-            'postId': post.id,
-            'title': post.title,
-            'timeStamp': post.timestamp,
-            'userName': post.user.username,
-            'userId': post.user.id,
-            # 'goodCount': Good.query.filter_by(post=post).count(),
-            'imageData': main_post.image_data,
-            'content': main_post.content,
-            'location': main_post.location,
-            'lat': main_post.lat,
-            'lng': main_post.lng
-            }
-        my_good_post_list.append(d)
+    
+    posts = current_user.good_post
 
-    return jsonify({'message': current_user.username, "myGoodPostList": my_good_post_list})
+    return render_template('post_list.html', posts=posts)
 
 
 # 投稿
@@ -329,7 +292,7 @@ def new_comment(post_id):
     
     db.session.add(Comment(post=post, user=current_user, content=content))
     db.session.commit()
-    return jsonify({'message': f"{current_user.username}-{content}",})
+    return redirect(url_for('post_list'))
 
 
 # 投稿に対してのいいね
@@ -374,7 +337,7 @@ def post_list(keyword=None):
     
     if keyword:
         if keyword[0] == '#':
-            tag = Tag.qeury.filter_by(tag_name=keyword[0]).first()
+            tag = Tag.qeury.filter_by(tag_name=keyword[1:]).first()
             posts = tag.post
         elif keyword[0] == '@':
             user = User.query.filter_by(usernmae=keyword[1:]).first()
@@ -422,10 +385,11 @@ def ranking_list(category_id=None):
     
     if category_id:
         category = Category.query.filter_by(id=category_id).first()
-        posts = category.post.order_by(Post.good_user.desc()).all()
+        posts = category.post.order_by(Post.timestamp.desc()).all()
 
     else:
-        posts = Post.query.order_by(Post.good_user.desc()).all()
+        posts = Post.query.order_by(Post.timestamp).all()
 
-    return jsonify({"postList": list_post(posts)})
+    print(posts)
 
+    return render_template('ranking.html', posts=posts)

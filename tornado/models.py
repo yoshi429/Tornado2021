@@ -13,6 +13,7 @@ def load_user(user_id):
 followers = db.Table('followers',
     db.Column('follower_id', db.Integer, db.ForeignKey('user.id')), # フォローした側 
     db.Column('followed_id', db.Integer, db.ForeignKey('user.id')), # フォローされた側
+    db.Column('timestamp', db.DateTime, nullable=False, default=datetime.utcnow),
 )
 
 
@@ -22,10 +23,11 @@ post_tags = db.Table('post_tags',
     db.Column('tag_id', db.Integer, db.ForeignKey('tag.id')),
 )
 
-# good table
+# goodテーブル
 post_goods = db.Table('post_goods',
     db.Column('post_id', db.Integer, db.ForeignKey('post.id')),
     db.Column('user_id', db.Integer, db.ForeignKey('user.id')),
+    db.Column('timestamp', db.DateTime, nullable=False, default=datetime.utcnow),
 )
 
 
@@ -38,6 +40,7 @@ class User(db.Model, UserMixin):
     username = db.Column(db.String(255), unique=True, nullable=False)
     email = db.Column(db.String(255), unique=True, nullable=False)
     password = db.Column(db.String(60), nullable=False)
+    timestamp = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
     followed = db.relationship(
                                 'User', secondary=followers,
@@ -149,6 +152,11 @@ class Post(db.Model):
     comment = db.relationship('Comment', backref='post', lazy=True)
     post_child = db.relationship('PostChild', backref='post', lazy=True)
 
+    # liked_user = db.relationship(
+    #                         'User', secondary=post_goods,
+    #                         backref=db.backref('liked_post', lazy='dynamic')
+    #                         )
+
     def __repr__(self):
         return f"{self.title}-{self.user.username}"
 
@@ -181,6 +189,7 @@ class Comment(db.Model):
     content = db.Column(db.String(255), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     post_id = db.Column(db.Integer, db.ForeignKey('post.id'), nullable=False)
+    timestamp = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     
 
     def __repr__(self):
