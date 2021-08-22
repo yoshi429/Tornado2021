@@ -97,8 +97,7 @@ class Profile(db.Model):
     __tablename__ = 'profile'
     id = db.Column(db.Integer, primary_key=True)
     image_data = db.Column(db.String(20), nullable=False, default='default.jpg')
-    content = db.Column(db.String(255), nullable=True)
-    location = db.Column(db.String(255), nullable=True)
+    content = db.Column(db.String(255), nullable=False, default='')
 
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     
