@@ -10,9 +10,26 @@
             <label for="username">username</label>
         </div>
         <div>
-            <input type="text" id='password' name='password'>
+            <input type="text" id='password' name='password' placeholder="8文字以上" >
             <label for="password">password</label>
         </div>
         <input type="submit" value="登録">
     </form>
+    <script>
+        pass = document.getElementById("password");
+        
+        pass.addEventListener('change',
+        function () {
+            password = pass.value;
+            if(password.length > 7){
+                console.log("ok");
+                if (password.match(/([a-z].*[A-Z])|([A-Z].*[a-z])/)){
+                    console.log("ok");
+                }
+            }else{
+                pass.style.background = "rgb(250,128,114)";
+                window.alert("文字数が足りません")
+            }
+        });
+    </script>
 {% endblock content %}
