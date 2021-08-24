@@ -40,6 +40,7 @@ class User(db.Model, UserMixin):
     username = db.Column(db.String(255), unique=True, nullable=False)
     email = db.Column(db.String(255), unique=True, nullable=False)
     password = db.Column(db.String(60), nullable=False)
+    is_admin = db.Column(db.Boolean, default=False, nullable=True)
     timestamp = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
     profile_id = db.relationship("Profile", backref='user', uselist=False)
@@ -155,6 +156,10 @@ class Post(db.Model):
 
     def __repr__(self):
         return f"{self.title}-{self.user.username}"
+
+
+    # def user_is_gooding():
+    #     return 
 
 
 class PostChild(db.Model):
