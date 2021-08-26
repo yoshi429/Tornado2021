@@ -342,9 +342,13 @@ def post_list():
             if user is not None:
                 posts = user.posts
         else:
-            category = Category.query.filter_by(category_name=keyword).first()
+            category = Post.query.filter(Post.title.contains(keyword)).all()
+            # category = PostChild.query.filter(PostChild.content.contains(keyword)).all()
+            # category = Category.query.filter_by(category_name=keyword).first()　
+            print(category)
             if category is not None:
-                posts = category.post
+                posts = category
+                #posts = category.post
     else:
         posts = Post.query.order_by(Post.timestamp.desc()).all()
     print(posts)
