@@ -1,35 +1,35 @@
 {% extends "layout.html" %}
 {% block content %}
-    <div>{{ current_user.username }}さん</div>
-    <form action="{{ url_for('new_post')}}" method="POST" enctype="multipart/form-data">
-        <div>
-            <input type="text" name="title">
-            <label for="content">title</label>
-        </div>
-        <div>
-            <input type="file" id="image_data" name="image_data" accept="image/jpeg, image/png">
-            <label for="image_data">画像</label>
-        </div>
-        <div>
-            <input type="text" name="content">
-            <label for="content">content</label>
-        </div>
-        <div>
-            <input type="text" name="location">
-            <label for="location">場所</label>
-        </div>
-        <div>
-            <input type="text" name="lat">
-            <label for="content">緯度</label>
-        </div>
-        <div>
-            <input type="text" name="lng">
-            <label for="content">経度</label>
-        </div>
-        <div>
-            <input type="text" name="category">
-            <label for="content">カテゴリー</label>
-        </div>
-        <input type="submit" value='update'>
-    </form>
+  <div>{{ current_user.username }}さん</div>
+  <form action="{{ url_for('new_post')}}" method="POST" enctype="multipart/form-data">
+    <div>
+      <input type="text" name="title"/>
+      <label for="content">title</label>
+    </div>
+    <div>
+      <input type="file" id="image_data" name="image_data" accept="image/jpeg, image/png"/>
+      <label for="image_data">画像</label>
+    </div>
+    <div>
+      <input type="text" name="content"/>
+      <label for="content">content</label>
+    </div>
+    <div>
+      <input type="text" name="location"/>
+      <label for="location">場所</label>
+    </div>
+    <div>
+      <input type="text" name="lat"/>
+      <label for="content">緯度</label>
+    </div>
+    <div>
+      <input type="text" name="lng"/>
+      <label for="content">経度</label>
+    </div>
+    <div>
+      <input type="text" name="category"/>
+      <label for="content">カテゴリー</label>
+    </div>
+    <input type="submit" value="update"/>
+  </form>
 {% endblock content %}
