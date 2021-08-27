@@ -117,7 +117,8 @@ def edit_profile(user_id):
         if request.files['image_data']:
             picture_file = save_picture(
                                         picture=request.files['image_data'], 
-                                        picture_save_path='static/profile_pictures'
+                                        picture_save_path='static/profile_pictures',
+                                        user_id=str(user.id)
                                         )
             profile.image_data = picture_file
 
@@ -252,8 +253,8 @@ def new_post():
                                 lng=float(lng), 
                                 image_data=save_picture(
                                     picture=image_data, 
-                                    picture_save_path='static/post_pictures'
-                                            ), 
+                                    picture_save_path='static/post_pictures',
+                                    user_id=str(current_user.id)), 
                                 num=1,
                                 post=new_post
                                 )
