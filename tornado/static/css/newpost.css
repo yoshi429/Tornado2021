@@ -1,7 +1,17 @@
-.new-post-modal {
+.new-post-modal .new-post-modal-content {
+  transform: translateY(100%);
+  transition: all 0.1s;
+}
+.new-post-modal.modal-open .new-post-modal-content {
+  transform: translateY(0);
 }
 
-.new-post-modal-overlay {
+.new-post-modal .new-post-modal-overlay {
+  transition: all 0.3s;
+  background: transparent;
+}
+
+.new-post-modal.modal-open .new-post-modal-overlay {
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.2);
@@ -24,6 +34,8 @@
 .new-post-modal-content {
   transition: all 0.3s;
   overflow-y: scroll;
+  display: flex;
+  flex-direction: column;
 }
 
 .new-post-modal-content.stucked {
@@ -51,11 +63,6 @@
 
 .new-post-modal .category-option:focus {
   outline: none;
-}
-
-.new-post-modal-content {
-  display: flex;
-  flex-direction: column;
 }
 
 .category-option .material-icons {

@@ -12,6 +12,15 @@ const closePostModal = postId => {
 };
 
 // newpost
+const openNewPostModal = () => {
+  document.getElementById("new-post-modal").classList.add("modal-open");
+};
+
+const closeNewPostModal = () => {
+  console.log(document.getElementById("new-post-modal").classList);
+  document.getElementById("new-post-modal").classList.remove("modal-open");
+};
+
 let spotCount = 0;
 let editSpotId = null;
 

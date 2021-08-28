@@ -7,14 +7,14 @@
   {% with posts = posts %}
   {% include 'snippets/posts.html'%}
   {% endwith %}
-  <button class="fab">
+  <button class="fab" onclick="openNewPostModal()">
     <i class="material-icons">
       photo_album
     </i>
     投稿する
   </button>
-  <div class="new-post-modal modal-open">
-    <div class="new-post-modal-overlay"></div>
+  <div id="new-post-modal" class="new-post-modal">
+    <div class="new-post-modal-overlay" onclick="closeNewPostModal()"></div>
     <form class="new-post-modal-content" id="new-post-modal-content" method="POST" enctype="multipart/form-data" action="{{ url_for('new_post')}}">
       <div class="category-section">
         <button type="button" class="category-option" id="pets-category-button" onclick="onSelectCategory('pets')">
