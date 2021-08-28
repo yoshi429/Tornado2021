@@ -7,4 +7,75 @@
   {% with posts = posts %}
   {% include 'snippets/posts.html'%}
   {% endwith %}
+  <button class="fab" onclick="openNewPostModal()">
+    <i class="material-icons">
+      photo_album
+    </i>
+    投稿する
+  </button>
+  <div id="new-post-modal" class="new-post-modal">
+    <div class="new-post-modal-overlay" onclick="closeNewPostModal()"></div>
+    <form class="new-post-modal-content" id="new-post-modal-content" method="POST" enctype="multipart/form-data" action="{{ url_for('new_post')}}">
+      <div class="category-section">
+        <button type="button" class="category-option" id="pets-category-button" onclick="onSelectCategory('pets')">
+          <span class="material-icons">
+            pets
+          </span>
+        </button>
+        <button type="button" class="category-option" id="elderly-category-button" onclick="onSelectCategory('elderly')">
+          {# TODO: 四葉マークくらいに差し替えたい #}
+          <span class="material-icons">
+            elderly
+          </span>
+        </button>
+        <button type="button" class="category-option" id="wheelchair-category-button" onclick="onSelectCategory('wheelchair')">
+          <span class="material-icons">
+            accessible
+          </span>
+        </button>
+        <input disabled="disabled" name="category" class="sr-only" id="plan-category"></input>
+      </div>
+      <div class="spot-section">
+        {% for id in[1, 2, 3, 4, 5] %}
+          <button type="button" class="spot-card not-added" id="spot-card-{{id}}" onclick="openEditModal({{id}})">
+            <div class="spot-card-img-section">
+              <img src="/static/post_pictures/47fb397554ebbe6b.jpg" class="spot-img-top"/>
+            </div>
+            <div class="spot-card-body-section">
+              <input disabled="disabled" name="spot-name-{{id}}" class="spot-card-title"></input>
+              <input disabled="disabled" name="spot-description-{{id}}" class="spot-card-description"></input>
+            </div>
+          </button>
+        {% endfor %}
+
+        <button type="button" class="spot-card spot-add-button" onclick="openEditModal()">
+          <span class="material-icons">
+            add_circle_outline
+          </span>
+          スポットを追加する
+        </button>
+      </div>
+      <div class="new-post-inpua-area">
+        <label for="plan-title">プラン名</label>
+        <input type="text" id="plan-title" name="plan-title" placeholder="プラン名"></input>
+
+        <label for="plan-description">プランの説明</label>
+        <textarea type="text" id="plan-description" name="plan-description" placeholder="プランの説明"></textarea>
+      </div>
+      <button class="spot-edit-modal-button" onclick="">投稿する</button>
+    </form>
+  </div>
+  <div class="spot-edit-modal" id="spot-edit-modal">
+    <label class="spot-edit-modal-img-wrapper">
+      <input class="spot-edit-modal-input sr-only" type="file" onchange="onSelectSpotImage(this)"></input>
+      <img src="/static/post_pictures/47fb397554ebbe6b.jpg" class="spot-edit-modal-img" id="spot-edit-modal-img"/>
+      <div class="spot-edit-modal-filter"></div>
+      <div class="spot-edit-modal-img-button">画像を変更する</div>
+    </label>
+    <label for="spot-title-input">タイトル</label>
+    <input type="text" class="spot-content-input spot-title-input" id="spot-title-input" placeholder="タイトル" required="required"></input>
+    <label for="spot-description-input">説明</label>
+    <textarea type="text" class="spot-content-input spot-description-input" id="spot-description-input" placeholder="説明" required="required"></textarea>
+    <button type="button" class="spot-edit-modal-button" onclick="completeEditModal()">OK</button>
+  </div>
 {% endblock content %}
