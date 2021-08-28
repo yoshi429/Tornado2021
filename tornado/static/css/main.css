@@ -1,3 +1,6 @@
+@import url("/static/css/fab.css");
+@import url("/static/css/newpost.css");
+
 body {
   background: rgb(243, 243, 243);
 }
@@ -5,6 +8,47 @@ body {
 * {
   font-family: "M PLUS Rounded 1c", sans-serif;
   color: #333333;
+  box-sizing: border-box;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+.navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 64px;
+  z-index: 100;
+  box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
+}
+
+.navbar-collapse {
+  background: white;
+  box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
+}
+
+.navbar-nav {
+  display: flex;
+  flex-direction: column;
+}
+
+.nav-item {
+  padding: 12px 24px;
+}
+
+.container {
+  padding-top: 64px;
 }
 
 .post-card {
