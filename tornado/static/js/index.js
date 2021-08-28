@@ -13,41 +13,70 @@ const closePostModal = postId => {
 
 // newpost
 const openNewPostModal = () => {
-  document.getElementById("new-post-modal").classList.add("modal-open");
+  document.getElementById("new-post-modal").classList.add("open-modal");
+  document.getElementById("plan-title").textContent = "";
+  document.getElementById("plan-description").textContent = "";
 };
 
 const closeNewPostModal = () => {
   console.log(document.getElementById("new-post-modal").classList);
-  document.getElementById("new-post-modal").classList.remove("modal-open");
+  document.getElementById("spot-edit-modal-0").classList.remove("open-modal");
+  document.getElementById("spot-edit-modal-1").classList.remove("open-modal");
+  document.getElementById("spot-edit-modal-2").classList.remove("open-modal");
+  document.getElementById("spot-edit-modal-3").classList.remove("open-modal");
+  document.getElementById("spot-edit-modal-4").classList.remove("open-modal");
+  document.getElementById("spot-edit-modal-5").classList.remove("open-modal");
+  document.getElementById("new-post-modal").classList.remove("open-modal");
+  document.getElementById("new-post-modal-content").classList.remove("stucked");
 };
 
 let spotCount = 0;
 let editSpotId = null;
 
-const openEditModal = spotId => {
+const openEditModal = _spotId => {
+  const spotId = _spotId == null
+    ? spotCount + 1
+    : _spotId;
   document.getElementById("new-post-modal-content").classList.add("stucked");
-  document.getElementById("spot-edit-modal").classList.add("open-modal");
-  if (spotId != null) {
-    editSpotId = spotId;
-    // 現在の入力内容を取得
-    const title = document.querySelector(`#spot-card-${spotCount} .spot-card-title`).value;
-    const description = document.querySelector(`#spot-card-${spotCount} .spot-card-description`).value;
-    // 入力内容をモーダルに反映
-    document.getElementById("spot-title-input").value = title;
-    document.getElementById("spot-description-input").value = description;
-  }
+  document.getElementById(`spot-edit-modal-${spotId}`).classList.add("open-modal");
+  editSpotId = _spotId;
+
+  // 現在の入力内容を取得
+  const src = document.querySelector(`#spot-card-${spotId} .spot-img-top`)
+    ?.src;
+  const title = document.querySelector(`#spot-card-${spotId} .spot-card-title`)
+    ?.textContent;
+  const description = document.querySelector(`#spot-card-${spotId} .spot-card-description`)
+    ?.textContent;
+  // 入力内容をモーダルに反映
+
+  document.getElementById(`spot-edit-modal-img-${spotId}`).src = src == null
+    ? ""
+    : src;
+  document.getElementById(`spot-title-input-${spotId}`).value = title == null
+    ? ""
+    : title;
+  document.getElementById(`spot-description-input-${spotId}`).value = description == null
+    ? ""
+    : description;
   // document.getElementById(`added-spot-${spotId}`)
 };
 
-const completeEditModal = () => {
+const closeEditModal = spotId => {
+  // モーダルを非表示
+  document.getElementById("new-post-modal-content").classList.remove("stucked");
+  document.getElementById(`spot-edit-modal-${spotId}`).classList.remove("open-modal");
+};
+
+const completeEditModal = spotId => {
   if (spotCount > 5) {
     alert("スポットはこれ以上登録できません");
     return;
   }
   // モーダルの入力内容を取得
-  const title = document.getElementById("spot-title-input").value;
-  const description = document.getElementById("spot-description-input").value;
-  const imgSrc = document.getElementById("spot-edit-modal-img").src;
+  const title = document.getElementById(`spot-title-input-${spotId}`).value;
+  const description = document.getElementById(`spot-description-input-${spotId}`).value;
+  const imgSrc = document.getElementById(`spot-edit-modal-img-${spotId}`).src;
   if (title == null || title === "") {
     alert("タイトルを入力してください");
     return;
@@ -57,26 +86,20 @@ const completeEditModal = () => {
     return;
   }
 
-  // モーダルを表示
-  document.getElementById("new-post-modal-content").classList.remove("stucked");
-  document.getElementById("spot-edit-modal").classList.remove("open-modal");
-
-  // モーダルの内容をクリア
-  document.getElementById("spot-title-input").value = "";
-  document.getElementById("spot-description-input").value = "";
+  closeEditModal(spotId);
 
   // 新規追加か判定
   if (editSpotId == null) {
     spotCount += 1;
     // spot-cardを表示
     document.getElementById(`spot-card-${spotCount}`).classList.remove("not-added");
-    document.querySelector(`#spot-card-${spotCount} .spot-card-title`).value = title;
-    document.querySelector(`#spot-card-${spotCount} .spot-card-description`).value = description;
+    document.querySelector(`#spot-card-${spotCount} .spot-card-title`).textContent = title;
+    document.querySelector(`#spot-card-${spotCount} .spot-card-description`).textContent = description;
     document.querySelector(`#spot-card-${spotCount} .spot-img-top`).src = imgSrc;
   } else {
     // spot-cardに反映
-    document.querySelector(`#spot-card-${editSpotId} .spot-card-title`).value = title;
-    document.querySelector(`#spot-card-${editSpotId} .spot-card-description`).value = description;
+    document.querySelector(`#spot-card-${editSpotId} .spot-card-title`).textContent = title;
+    document.querySelector(`#spot-card-${editSpotId} .spot-card-description`).textContent = description;
     document.querySelector(`#spot-card-${editSpotId} .spot-img-top`).src = imgSrc;
     // 編集終了
     editSpotId = null;
@@ -84,13 +107,14 @@ const completeEditModal = () => {
 };
 
 // 編集/追加モーダルの画像プレビュー
-const onSelectSpotImage = e => {
+const onSelectSpotImage = (e, spotId) => {
   if (e.files.length === 0) {
     return;
   }
   const imgUrl = URL.createObjectURL(e.files[0]);
   console.log(imgUrl);
-  document.getElementById("spot-edit-modal-img").src = imgUrl;
+  document.getElementById(`spot-edit-modal-img-${spotId}`).src = imgUrl;
+  document.querySelector(`#spot-card-${spotId} .spot-img-top`).src = imgUrl;
 };
 
 // カテゴリ選択時の反映

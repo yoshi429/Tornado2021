@@ -33,19 +33,33 @@
             accessible
           </span>
         </button>
-        <input disabled="disabled" name="category" class="sr-only" id="plan-category"></input>
+        <input name="category" class="sr-only" id="plan-category"></input>
       </div>
       <div class="spot-section">
         {% for id in[1, 2, 3, 4, 5] %}
           <button type="button" class="spot-card not-added" id="spot-card-{{id}}" onclick="openEditModal({{id}})">
             <div class="spot-card-img-section">
-              <img src="/static/post_pictures/47fb397554ebbe6b.jpg" class="spot-img-top"/>
+              <img src="" class="spot-img-top"/>
             </div>
             <div class="spot-card-body-section">
-              <input disabled="disabled" name="spot-name-{{id}}" class="spot-card-title"></input>
-              <input disabled="disabled" name="spot-description-{{id}}" class="spot-card-description"></input>
+              <h2 class="spot-card-title"></h2>
+              <p class="spot-card-description"></p>
             </div>
           </button>
+          <div class="spot-edit-modal" id="spot-edit-modal-{{id}}">
+            <label class="spot-edit-modal-img-wrapper" for="spot-{{id}}-image">
+              <input type="file" accept="image/*" name="spot-{{id}}-image" id="spot-{{id}}-image" class="spot-edit-modal-input" onchange="onSelectSpotImage(this, {{id}})"></input>
+              <img src="" class="spot-edit-modal-img" id="spot-edit-modal-img-{{id}}"/>
+              <div class="spot-edit-modal-filter"></div>
+              <div class="spot-edit-modal-img-button">画像を変更する</div>
+            </label>
+            <label for="spot-title-input-{{id}}">タイトル</label>
+            <input type="text" name="spot-{{id}}-title" class="spot-content-input spot-title-input" id="spot-title-input-{{id}}" placeholder="タイトル"></input>
+            <label for="spot-description-input-{{id}}">説明</label>
+            <textarea type="text" name="spot-{{id}}-description" class="spot-content-input spot-description-input" id="spot-description-input-{{id}}" placeholder="説明"></textarea>
+            <button type="button" class="spot-edit-modal-button" onclick="completeEditModal({{id}})">OK</button>
+            <button type="button" class="spot-edit-modal-button cancel-button" onclick="closeEditModal({{id}})">キャンセル</button>
+          </div>
         {% endfor %}
 
         <button type="button" class="spot-card spot-add-button" onclick="openEditModal()">
@@ -57,25 +71,12 @@
       </div>
       <div class="new-post-inpua-area">
         <label for="plan-title">プラン名</label>
-        <input type="text" id="plan-title" name="plan-title" placeholder="プラン名"></input>
+        <input type="text" id="plan-title" name="title" placeholder="プラン名"></input>
 
         <label for="plan-description">プランの説明</label>
-        <textarea type="text" id="plan-description" name="plan-description" placeholder="プランの説明"></textarea>
+        <textarea type="text" id="plan-description" name="content" placeholder="プランの説明"></textarea>
       </div>
       <button class="spot-edit-modal-button" onclick="">投稿する</button>
     </form>
-  </div>
-  <div class="spot-edit-modal" id="spot-edit-modal">
-    <label class="spot-edit-modal-img-wrapper">
-      <input class="spot-edit-modal-input sr-only" type="file" onchange="onSelectSpotImage(this)"></input>
-      <img src="/static/post_pictures/47fb397554ebbe6b.jpg" class="spot-edit-modal-img" id="spot-edit-modal-img"/>
-      <div class="spot-edit-modal-filter"></div>
-      <div class="spot-edit-modal-img-button">画像を変更する</div>
-    </label>
-    <label for="spot-title-input">タイトル</label>
-    <input type="text" class="spot-content-input spot-title-input" id="spot-title-input" placeholder="タイトル" required="required"></input>
-    <label for="spot-description-input">説明</label>
-    <textarea type="text" class="spot-content-input spot-description-input" id="spot-description-input" placeholder="説明" required="required"></textarea>
-    <button type="button" class="spot-edit-modal-button" onclick="completeEditModal()">OK</button>
   </div>
 {% endblock content %}
