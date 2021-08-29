@@ -1,3 +1,4 @@
+import boto3
 import os
 import secrets
 from PIL import Image
@@ -17,6 +18,26 @@ def save_picture(picture, picture_save_path, user_id):
     # i.thumbnail(output_size)
     i.save(picture_path)
     
+    return picture_fn
+
+
+def save_pictures_s3(picture, user_id):
+    aws_access_key_id = ""
+    aws_secret_access_key = ""
+    s3_bucket = ""
+    s3 = boto3.client('s3',
+                region_name='us-east-1',
+                aws_access_key_id=aws_access_key_id,
+                aws_secret_access_key=aws_secret_access_key,
+                )
+    random_hex = secrets.token_hex(8)
+    _, f_ext = os.path.splitext(picture.filename)
+    picture_fn = random_hex + str(user_id) + f_ext
+    response = s3.put_object(
+            Body=picture,
+            Bucket=s3_bucket,
+            Key=picture_fn
+        )
     return picture_fn
 
 

@@ -9,7 +9,7 @@ from tornado.models import (
                             post_goods, Category, Tag,
                             post_tags
                             )
-from tornado.utils import list_post, post_detail_list, save_picture
+from tornado.utils import list_post, post_detail_list, save_picture, save_pictures_s3
 
 
 @app.route("/")
@@ -263,7 +263,7 @@ def new_post():
 
         count = 1
         for title, description, image in zip(titles,descriptions,images):
-            if title is not '':
+            if title != '':
 
                 # 投稿とタグを中間テーブルで結びつける
                 words = description.split()
@@ -277,10 +277,14 @@ def new_post():
                 PostChild(
                         title=title,
                         description =description,
-                        image_data=save_picture(
-                            picture=image, 
-                            picture_save_path='static/post_pictures',
-                            user_id=str(current_user.id)), 
+                        # image_data=save_picture(
+                        #     picture=image, 
+                        #     picture_save_path='static/post_pictures',
+                        #     user_id=str(current_user.id)), 
+                        image_data=save_pictures_s3(
+                            picture=image,
+                            user_id=current_user.id
+                        ),
                         num=count,
                         post=new_post
                         )
@@ -331,6 +335,7 @@ def post_handle_good(post_id):
     post.good_count = post.good_user.count()
     db.session.commit()
     return redirect(url_for('post_list'))
+
 
 
 # 投稿の詳細画面

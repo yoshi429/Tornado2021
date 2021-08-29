@@ -4,7 +4,7 @@
       <div class="post-card-img-section">
         {% if post.post_child | length == 1 %}
           <div class="post-card-img-wrapper">
-            <img src="/static/post_pictures/{{child.image_data}}" class="card-img-top card-img-single"/>
+            <img src="/static/post_pictures/{{post.post_child[0].image_data}}" class="card-img-top card-img-single"/>
           </div>
         {% else %}
           {% if post.post_child | length == 2 %}
