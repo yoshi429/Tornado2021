@@ -344,11 +344,8 @@ def post_detail(post_id):
 
     if post is None:
         return jsonify({'message': "この投稿は存在しません。", "status_code": 404}) ,404
-    
-    post_childs = post.post_child
-    print(post_childs)
 
-    return jsonify({"post_detail": post_detail_list(post_childs)})
+    return render_template('post/post_detail.html', post=post)
 
 
 # 投稿リスト カテゴリー検索

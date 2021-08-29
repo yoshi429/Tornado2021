@@ -1,0 +1,74 @@
+.plan-detail-page {
+  max-width: 740px;
+}
+
+.plan-detail-cover {
+  position: relative;
+  height: 200px;
+  width: calc(100% + 24px);
+  margin-left: -12px;
+}
+
+.plan-detail-img {
+  width: 100%;
+  object-fit: cover;
+  height: 100%;
+}
+
+.plan-detal-title {
+  position: absolute;
+  left: 0px;
+  bottom: 24px;
+  font-size: 24px;
+  font-weight: bold;
+  background: rgba(255, 255, 255, 0.92);
+  padding: 8px 24px;
+  box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
+}
+
+.plan-detail-description {
+  margin-top: 24px;
+  font-size: 16px;
+  border-radius: 8px;
+  padding: 8px;
+  background: white;
+}
+
+.plan-detail-author {
+  margin-top: 12px;
+  margin-bottom: 36px;
+  margin-right: 12px;
+  text-align: end;
+}
+
+.plan-detail-body {
+  border-top: 2px solid rgb(207, 207, 207);
+}
+
+.plan-detail-spot-title {
+  margin-top: 36px;
+  font-size: 24px;
+}
+
+.plan-detail-spot-img {
+  max-height: 260px;
+  margin: 12px auto;
+}
+
+.plan-detail-spot-description {
+  font-size: 16px;
+}
+
+.plan-detail-back-button {
+  margin-top: 64px;
+  text-align: center;
+  width: 100%;
+  padding: 8px 0;
+  box-shadow: rgba(255, 147, 85, 0.5) 0px 2px 8px 0px;
+  background: rgb(255, 147, 85);
+  border-radius: 24px;
+  color: white;
+  font-weight: bold;
+  display: block;
+  width: 100%;
+}
