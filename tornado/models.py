@@ -145,6 +145,7 @@ class Post(db.Model):
     __tablename__ = 'post'
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(255), nullable=False)
+    content = db.Column(db.Text, nullable=False)
     timestamp = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     good_count = db.Column(db.Integer, nullable=False, default=0)
 
@@ -158,20 +159,14 @@ class Post(db.Model):
         return f"{self.title}-{self.user.username}"
 
 
-    # def user_is_gooding():
-    #     return 
-
-
 class PostChild(db.Model):
     """
     投稿内容
     """
     id = db.Column(db.Integer, primary_key=True)
-    content = db.Column(db.Text, nullable=False)
+    title = db.Column(db.String(255), nullable=False)
+    description = db.Column(db.Text, nullable=False)
     image_data = db.Column(db.String(20), nullable=False)
-    location = db.Column(db.String(255), nullable=False)
-    lat = db.Column(db.Float, nullable=False) # 緯度 
-    lng = db.Column(db.Float, nullable=False) # 経度
     num = db.Column(db.Integer, nullable=False)
 
     post_id = db.Column(db.Integer, db.ForeignKey('post.id'), nullable=False)

@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: be56ae462a7a
+Revision ID: 2eafb6a19d60
 Revises: 
-Create Date: 2021-08-28 08:22:49.313775
+Create Date: 2021-08-29 10:31:15.803196
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'be56ae462a7a'
+revision = '2eafb6a19d60'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -49,6 +49,7 @@ def upgrade():
     op.create_table('post',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('title', sa.String(length=255), nullable=False),
+    sa.Column('content', sa.Text(), nullable=False),
     sa.Column('timestamp', sa.DateTime(), nullable=False),
     sa.Column('good_count', sa.Integer(), nullable=False),
     sa.Column('category_id', sa.Integer(), nullable=False),
@@ -77,11 +78,9 @@ def upgrade():
     )
     op.create_table('post_child',
     sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('content', sa.Text(), nullable=False),
+    sa.Column('title', sa.String(length=255), nullable=False),
+    sa.Column('description', sa.Text(), nullable=False),
     sa.Column('image_data', sa.String(length=20), nullable=False),
-    sa.Column('location', sa.String(length=255), nullable=False),
-    sa.Column('lat', sa.Float(), nullable=False),
-    sa.Column('lng', sa.Float(), nullable=False),
     sa.Column('num', sa.Integer(), nullable=False),
     sa.Column('post_id', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['post_id'], ['post.id'], ),
