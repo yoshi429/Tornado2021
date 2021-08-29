@@ -1,67 +1,99 @@
 {% if posts %}
   {% for post in posts %}
-    {% for child in post.post_child %}
-      <div class="post-card">
-        <div class="post-card-img-section">
-          <img src="/static/post_pictures/{{child.image_data}}" class="card-img-top"/>
-        </div>
-        <div class="card-body-section">
-          <h5 class="card-title">{{post.title}}</h5>
-          <p class="card-text">{{child.content}}</p>
-          <form class="card-footer-section" action="{{ url_for('post_handle_good', post_id=post.id)}}" method="POST">
-            <button class="card-footer-left" type="button" onclick="openPostModal({{post.id}})">
-              コメントを見る
-            </button>
-            <button class="card-footer-right">
+    <div class="post-card">
+      <div class="post-card-img-section">
+        {% if post.post_child | length == 1 %}
+          <div class="post-card-img-wrapper">
+            <img src="/static/post_pictures/{{child.image_data}}" class="card-img-top card-img-single"/>
+          </div>
+        {% else %}
+          {% if post.post_child | length == 2 %}
+            <div class="post-card-img-wrapper">
+              <img src="/static/post_pictures/{{post.post_child[0].image_data}}" class="card-img-top card-img-left"/>
+              <img src="/static/post_pictures/{{post.post_child[1].image_data}}" class="card-img-top card-img-right"/>
+            </div>
+          {% elif post.post_child | length == 3 %}
+            <div class="post-card-img-wrapper">
+              <img src="/static/post_pictures/{{post.post_child[0].image_data}}" class="card-img-top card-img-left"/>
+              <img src="/static/post_pictures/{{post.post_child[1].image_data}}" class="card-img-top card-img-right-top"/>
+              <img src="/static/post_pictures/{{post.post_child[2].image_data}}" class="card-img-top card-img-right-bottom"/>
+            </div>
+          {% elif post.post_child | length >= 4 %}
+            <div class="post-card-img-wrapper">
+              <img src="/static/post_pictures/{{post.post_child[0].image_data}}" class="card-img-top card-img-left"/>
+              <img src="/static/post_pictures/{{post.post_child[1].image_data}}" class="card-img-top card-img-right-top"/>
+              <img src="/static/post_pictures/{{post.post_child[2].image_data}}" class="card-img-top card-img-right-bottom"/>
+              <div class="img-more-panel">
+                +{{post.post_child | length - 2}}件
+                <div class="swipe-message">
+                  右へスワイプ
+                </div>
+              </div>
+            </div>
+          {% endif %}
+          {% for child in post.post_child %}
+            <div class="post-card-img-wrapper">
+              <img src="/static/post_pictures/{{child.image_data}}" class="card-img-top card-img-single"/>
+            </div>
+          {% endfor %}
+        {% endif %}
+      </div>
+      <div class="card-body-section">
+        <h5 class="card-title">{{post.title}}</h5>
+        <p class="card-text">{{post.description}}</p>
+        <form class="card-footer-section" action="{{ url_for('post_handle_good', post_id=post.id)}}" method="POST">
+          <button class="card-footer-left" type="button" onclick="openPostModal({{post.id}})">
+            コメントを見る
+          </button>
+          <button class="card-footer-right">
+            <i class="material-icons icon">
+              {# TODO: 自分がgood済みかを判定したい #}
+              {{'thumb_up_alt' if current_user.id in post.good_user  else 'thumb_up_off_alt' }}
+            </i>
+            行きたい
+            {% if post
+              .good_user
+              .count() != 0 %}
+              ({{ post.good_user.count() }})
+            {% endif %}
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <div class="post-modal" id="post-modal-{{post.id}}">
+      <div class="post-modal-overlay" onclick="closePostModal({{post.id}})"></div>
+      <div class="post-modal-content">
+        {# <p>
+            <a href="{{ url_for('good_user_list', post_id=post.id )}}">{{ post.good_user.count() }}件</a>
+          </p> #}
+        <div class="comment-area">
+          {% for comment in post.comment %}
+            <div class="comment-box">
+              <div class="comment-body">
+                {{ comment.content }}
+              </div>
+              <div class="comment-author">
+                @{{ comment.user.username }}
+              </div>
+            </div>
+          {% else %}
+            <span class="material-icons">
+              question_answer
+            </span>
+            <p class="empty-message">コメントはまだ投稿されていません<br/>ぜひ投稿してみましょう!!</p>
+            {% endfor%}
+          </div>
+          <form class="comment-input-section" action="{{ url_for('new_comment', post_id=post.id) }}" method="POST">
+            <input class="comment-input-area" type="text" name="content" id="content" placeholder="コメントを入力" inputmode="search" required="required" pattern=".+"/>
+            <button class="comment-send-button">
               <i class="material-icons icon">
-                {# TODO: 自分がgood済みかを判定したい #}
-                {{'thumb_up_alt' if current_user.id in post.good_user  else 'thumb_up_off_alt' }}
+                send
               </i>
-              行きたい
-              {% if post
-                .good_user
-                .count() != 0 %}
-                ({{ post.good_user.count() }})
-              {% endif %}
             </button>
           </form>
         </div>
       </div>
-
-      <div class="post-modal" id="post-modal-{{post.id}}">
-        <div class="post-modal-overlay" onclick="closePostModal({{post.id}})"></div>
-        <div class="post-modal-content">
-          {# <p>
-            <a href="{{ url_for('good_user_list', post_id=post.id )}}">{{ post.good_user.count() }}件</a>
-          </p> #}
-          <div class="comment-area">
-            {% for comment in post.comment %}
-              <div class="comment-box">
-                <div class="comment-body">
-                  {{ comment.content }}
-                </div>
-                <div class="comment-author">
-                  @{{ comment.user.username }}
-                </div>
-              </div>
-            {% else %}
-              <span class="material-icons">
-                question_answer
-              </span>
-              <p class="empty-message">コメントはまだ投稿されていません<br/>ぜひ投稿してみましょう!!</p>
-              {% endfor%}
-            </div>
-            <form class="comment-input-section" action="{{ url_for('new_comment', post_id=post.id) }}" method="POST">
-              <input class="comment-input-area" type="text" name="content" id="content" placeholder="コメントを入力" inputmode="search" required="required" pattern=".+"/>
-              <button class="comment-send-button">
-                <i class="material-icons icon">
-                  send
-                </i>
-              </button>
-            </form>
-          </div>
-        </div>
-      {% endfor %}
     {% endfor %}
   {% else %}
     <div>検索結果が見つかりません。</div>
