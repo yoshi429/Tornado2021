@@ -3,7 +3,8 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
 from flask_login import LoginManager
 
-app = Flask(__name__)
+application = Flask(__name__)
+app = application
 app.config.from_object('tornado.config')
 db = SQLAlchemy(app)
 bcrypt = Bcrypt(app)
