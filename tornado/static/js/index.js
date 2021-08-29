@@ -20,7 +20,6 @@ const openNewPostModal = () => {
 
 const closeNewPostModal = () => {
   console.log(document.getElementById("new-post-modal").classList);
-  document.getElementById("spot-edit-modal-0").classList.remove("open-modal");
   document.getElementById("spot-edit-modal-1").classList.remove("open-modal");
   document.getElementById("spot-edit-modal-2").classList.remove("open-modal");
   document.getElementById("spot-edit-modal-3").classList.remove("open-modal");
@@ -66,6 +65,11 @@ const closeEditModal = spotId => {
   // モーダルを非表示
   document.getElementById("new-post-modal-content").classList.remove("stucked");
   document.getElementById(`spot-edit-modal-${spotId}`).classList.remove("open-modal");
+  // 値をリセット
+  document.getElementById(`spot-title-input-${spotId}`).value = "";
+  document.getElementById(`spot-description-input-${spotId}`).value = "";
+  document.getElementById(`spot-edit-modal-img-${spotId}`).src = "";
+  document.getElementById(`spot-${spotId}-image`).src = "";
 };
 
 const completeEditModal = spotId => {
@@ -86,7 +90,9 @@ const completeEditModal = spotId => {
     return;
   }
 
-  closeEditModal(spotId);
+  // モーダルを非表示
+  document.getElementById("new-post-modal-content").classList.remove("stucked");
+  document.getElementById(`spot-edit-modal-${spotId}`).classList.remove("open-modal");
 
   // 新規追加か判定
   if (editSpotId == null) {
