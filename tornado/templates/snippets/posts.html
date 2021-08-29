@@ -4,7 +4,7 @@
       <div class="post-card-img-section">
         {% if post.post_child | length == 1 %}
           <div class="post-card-img-wrapper">
-            <img src="/static/post_pictures/{{child.image_data}}" class="card-img-top card-img-single"/>
+            <img src="/static/post_pictures/{{post.post_child[0].image_data}}" class="card-img-top card-img-single"/>
           </div>
         {% else %}
           {% if post.post_child | length == 2 %}
@@ -40,7 +40,7 @@
       </div>
       <div class="card-body-section">
         <h5 class="card-title">{{post.title}}</h5>
-        <p class="card-text">{{post.description}}</p>
+        <p class="card-text">{{post.content}}</p>
         <form class="card-footer-section" action="{{ url_for('post_handle_good', post_id=post.id)}}" method="POST">
           <button class="card-footer-left" type="button" onclick="openPostModal({{post.id}})">
             コメントを見る
