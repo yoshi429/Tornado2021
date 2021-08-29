@@ -24,6 +24,14 @@
         accessible
       </span>
     </a>
+    <a href="{{ url_for('my_good_list') }}" class="category-option good-option {{'selected' if selectedTab == 'good' else ''}}">
+      <span class="material-icons">
+        thumb_up_alt
+      </span>
+      <span class="small-label">
+        行きたい
+      </span>
+    </a>
     <input name="category" class="sr-only" id="plan-category"></input>
   </div>
   {% with posts = posts %}

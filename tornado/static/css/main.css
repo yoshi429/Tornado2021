@@ -62,16 +62,35 @@ body {
 
 .category-tab .category-option {
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 16px 0;
+  padding: 12px 0;
   flex: 1;
   outline: none;
+  border-top: 2px solid transparent;
   border-bottom: 4px solid transparent;
   transition: all 0.1s;
   text-align: center;
   font-weight: bold;
   color: rgb(153, 153, 153);
+}
+
+.category-tab .category-option.good-option {
+  border-left: 2px solid rgb(224, 224, 224);
+}
+
+.category-tab .category-option.good-option .material-icons {
+  font-size: 24px;
+}
+
+.category-tab .category-option .small-label {
+  font-size: 10px;
+  color: rgb(153, 153, 153);
+}
+
+.category-tab .category-option.selected .small-label {
+  color: #333333;
 }
 
 .category-tab .category-option.selected {

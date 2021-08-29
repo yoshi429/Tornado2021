@@ -209,7 +209,7 @@ def my_good_list():
     
     posts = current_user.good_post
 
-    return render_template('post/post_list.html', posts=posts)
+    return render_template('post/post_list.html', posts=posts, selectedTab="good")
 
 
 # 投稿
