@@ -9,7 +9,7 @@ from tornado.models import (
                             post_goods, Category, Tag,
                             post_tags
                             )
-from tornado.utils import list_post, post_detail_list, save_picture, save_pictures_s3
+from tornado.utils import save_picture, save_pictures_s3
 
 
 @app.route("/")
@@ -115,11 +115,10 @@ def edit_profile(user_id):
         profile = Profile.query.filter_by(user_id=user_id).first()
 
         if request.files['image_data']:
-            picture_file = save_picture(
-                                        picture=request.files['image_data'], 
-                                        picture_save_path='static/profile_pictures',
-                                        user_id=str(user.id)
-                                        )
+            picture_file = image_data=save_pictures_s3(
+                            picture=request.files['image_data'],
+                            user_id=current_user.id
+                        ),
             profile.image_data = picture_file
 
         profile.content = request.form['content']
@@ -198,8 +197,7 @@ def user_post_list(user_id):
     if user is None:
         return jsonify({'message': 'userが見つかりません'})
     posts = user.posts
-    print(posts)
-    return jsonify({'message': user.username, "userPostList": list_post(posts)})
+    return jsonify({'message': user.username, "userPostList": posts})
 
 
 # 自分のいいねリスト
@@ -218,11 +216,12 @@ def my_good_list():
 def new_post():
 
     if request.method == 'POST':
-    
+        
         category = request.form['category']
         title = request.form['title']
         content = request.form['content']
-
+        if category == '':
+            category = 'all'
         category = Category.query.filter_by(category_name=category).first()
         if category is None:
             print("無効なカテゴリーです。")
@@ -263,6 +262,7 @@ def new_post():
 
         count = 1
         for title, description, image in zip(titles,descriptions,images):
+            # タイトルの有無で投稿があるか判断
             if title != '':
 
                 # 投稿とタグを中間テーブルで結びつける
@@ -277,10 +277,6 @@ def new_post():
                 PostChild(
                         title=title,
                         description =description,
-                        # image_data=save_picture(
-                        #     picture=image, 
-                        #     picture_save_path='static/post_pictures',
-                        #     user_id=str(current_user.id)), 
                         image_data=save_pictures_s3(
                             picture=image,
                             user_id=current_user.id
