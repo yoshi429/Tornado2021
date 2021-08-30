@@ -5,6 +5,7 @@ from PIL import Image
 from flask import current_app
 from tornado import app
 from tornado.models import post_goods
+from tornado.config import AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, S3_BUCKET
 
 
 # ローカルに写真を保存
@@ -39,7 +40,8 @@ def save_pictures_s3(picture, user_id):
     response = s3.put_object(
             Body=picture,
             Bucket=s3_bucket,
-            Key=picture_fn
+            Key=picture_fn,
+            ACL='public-read'
         )
     return f"https://tornado2021.s3.amazonaws.com/{picture_fn}"
 
