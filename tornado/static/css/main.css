@@ -51,6 +51,35 @@ body {
   padding-top: 64px;
 }
 
+.category-tab {
+  display: flex;
+  background: white;
+  box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
+  padding: 0;
+  width: 100vw;
+  margin-left: -12px;
+}
+
+.category-tab .category-option {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px 0;
+  flex: 1;
+  outline: none;
+  border-bottom: 4px solid transparent;
+  transition: all 0.1s;
+  text-align: center;
+  font-weight: bold;
+  color: rgb(153, 153, 153);
+}
+
+.category-tab .category-option.selected {
+  background: #f1f1f1;
+  border-bottom-color: rgb(255, 147, 85);
+  color: #333333;
+}
+
 .post-card {
   width: 100%;
   background: white;

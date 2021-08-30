@@ -362,6 +362,7 @@ def post_list():
 
     keyword = ''
     posts = None
+    category=''
 
     if request.method == 'POST':
         keyword = request.form['keyword']
@@ -383,10 +384,14 @@ def post_list():
                 posts = category
                 #posts = category.post
     else:
-        posts = Post.query.order_by(Post.timestamp.desc()).all()
-    print(posts)
+        category = request.args.get('category')
+        if category is None:
+          posts = Post.query.order_by(Post.timestamp.desc()).all()
+        else:
+          posts = Post.query.order_by(Post.timestamp.desc()).join(Category.query.filter_by(id=category)).all()
+        
 
-    return render_template('post/post_list.html', posts=posts, keyword=keyword)
+    return render_template('post/post_list.html', posts=posts, keyword=keyword, selectedTab=category if category is not None else '0')
 
 
 # 投稿に対してのコメントリスト

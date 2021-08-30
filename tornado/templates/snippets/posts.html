@@ -40,7 +40,7 @@
       </div>
       <div class="card-body-section">
         <h5 class="card-title">{{post.title}}</h5>
-        <p class="card-text">{{post.description}}</p>
+        <p class="card-text">{{post.content}}</p>
         <form class="card-footer-section" action="{{ url_for('post_handle_good', post_id=post.id)}}" method="POST">
           <button class="card-footer-left" type="button" onclick="openPostModal({{post.id}})">
             コメントを見る
