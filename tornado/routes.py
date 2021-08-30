@@ -207,7 +207,7 @@ def my_good_list():
     
     posts = current_user.good_post
 
-    return render_template('post/post_list.html', posts=posts)
+    return render_template('post/post_list.html', posts=posts, selectedTab="good")
 
 
 # 投稿
@@ -345,11 +345,8 @@ def post_detail(post_id):
 
     if post is None:
         return jsonify({'message': "この投稿は存在しません。", "status_code": 404}) ,404
-    
-    post_childs = post.post_child
-    print(post_childs)
 
-    return jsonify({"post_detail": post_childs})
+    return render_template('post/post_detail.html', post=post)
 
 
 # 投稿リスト カテゴリー検索

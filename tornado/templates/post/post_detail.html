@@ -1,0 +1,25 @@
+{% extends "layout.html" %}
+{% block content %}
+  <div class="plan-detail-page">
+    <div class="plan-detail-cover">
+      <img class="plan-detail-img" src="/static/post_pictures/{{post.post_child[1].image_data if post.post_child|length >  1 else post.post_child[0].image_data}}" alt="">
+      <h1 class="plan-detal-title">{{post.title}}</h1>
+    </div>
+    <p class="plan-detail-description">{{post.content}}</p>
+    <p class="plan-detail-author">
+      by
+      {{post.user_id}}
+    </p>
+    <div class="plan-detail-body">
+      {% for post_child in post.post_child %}
+        <section>
+          <h2 class="plan-detail-spot-title" id="spot-{{loop.index0}}">{{['①','②','③','④','⑤'][loop.index0]}}
+            {{post_child.title}}</h2>
+          <img src="/static/post_pictures/{{post_child.image_data}}" alt="" class="plan-detail-spot-img">
+          <p class="plan-detail-spot-description">{{post_child.description}}</p>
+        </section>
+      {% endfor %}
+    </div>
+    <a href="{{url_for('post_list')}}" class="plan-detail-back-button" onclick="">一覧へ戻る</a>
+  </div>
+{% endblock content %}
