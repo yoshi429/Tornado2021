@@ -1,4 +1,4 @@
-import re
+import random
 from flask import request, jsonify, redirect, url_for, render_template, request
 from flask_login import login_user, current_user, logout_user, login_required
 
@@ -10,17 +10,6 @@ from tornado.models import (
                             post_tags
                             )
 from tornado.utils import save_picture, save_pictures_s3
-
-
-@app.route("/")
-def test():
-    return render_template('index.html')
-
-
-@app.route("/home")
-def home():
-    return render_template('home.html')
-
 
 
 # ユーザー登録 プロフィール自動登録
@@ -216,13 +205,15 @@ def my_good_list():
 def new_post():
 
     if request.method == 'POST':
-        
+
         category = request.form['category']
         title = request.form['title']
         content = request.form['content']
-        if category == '':
-            category = 'all'
-        category = Category.query.filter_by(category_name=category).first()
+        
+        category_list = Category.query.all()
+        category = random.choice(category_list)
+
+        # category = Category.query.filter_by(category_name=category).first()
         if category is None:
             print("無効なカテゴリーです。")
             return jsonify({'message': '無効なカテゴリーです。'})
@@ -350,7 +341,7 @@ def post_detail(post_id):
 
 
 # 投稿リスト カテゴリー検索
-@app.route("/post/list", methods=['GET', 'POST'])
+@app.route("/", methods=['GET', 'POST'])
 def post_list():
 
     keyword = ''
@@ -358,6 +349,7 @@ def post_list():
     category=''
 
     if request.method == 'POST':
+
         keyword = request.form['keyword']
         print(keyword)
         if keyword[0] == '#':

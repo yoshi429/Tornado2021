@@ -5,41 +5,41 @@
         {% if post.post_child | length == 1 %}
           <div class="post-card-img-wrapper">
             <a href="{{url_for('post_detail',post_id=post.id,  _anchor='spot-0')}}">
-              <img src="/static/post_pictures/{{post.post_child[0].image_data}}" class="card-img-top card-img-single"/>
+              <img src="{{post.post_child[0].image_data}}" class="card-img-top card-img-single"/>
             </a>
           </div>
         {% else %}
           {% if post.post_child | length == 2 %}
             <div class="post-card-img-wrapper">
               <a href="{{url_for('post_detail',post_id=post.id,  _anchor='spot-0')}}">
-                <img src="/static/post_pictures/{{post.post_child[0].image_data}}" class="card-img-top card-img-left"/>
+                <img src="{{post.post_child[0].image_data}}" class="card-img-top card-img-left"/>
               </a>
               <a href="{{url_for('post_detail',post_id=post.id,  _anchor='spot-1')}}">
-                <img src="/static/post_pictures/{{post.post_child[1].image_data}}" class="card-img-top card-img-right"/>
+                <img src="{{post.post_child[1].image_data}}" class="card-img-top card-img-right"/>
               </a>
             </div>
           {% elif post.post_child | length == 3 %}
             <div class="post-card-img-wrapper">
               <a href="{{url_for('post_detail',post_id=post.id,  _anchor='spot-0')}}">
-                <img src="/static/post_pictures/{{post.post_child[0].image_data}}" class="card-img-top card-img-left"/>
+                <img src="{{post.post_child[0].image_data}}" class="card-img-top card-img-left"/>
               </a>
               <a href="{{url_for('post_detail',post_id=post.id,  _anchor='spot-1')}}">
-                <img src="/static/post_pictures/{{post.post_child[1].image_data}}" class="card-img-top card-img-right-top"/>
+                <img src="{{post.post_child[1].image_data}}" class="card-img-top card-img-right-top"/>
               </a>
               <a href="{{url_for('post_detail',post_id=post.id,  _anchor='spot-2')}}">
-                <img src="/static/post_pictures/{{post.post_child[2].image_data}}" class="card-img-top card-img-right-bottom"/>
+                <img src="{{post.post_child[2].image_data}}" class="card-img-top card-img-right-bottom"/>
               </a>
             </div>
           {% elif post.post_child | length >= 4 %}
             <div class="post-card-img-wrapper">
               <a href="{{url_for('post_detail',post_id=post.id,  _anchor='spot-0')}}">
-                <img src="/static/post_pictures/{{post.post_child[0].image_data}}" class="card-img-top card-img-left"/>
+                <img src="{{post.post_child[0].image_data}}" class="card-img-top card-img-left"/>
               </a>
               <a href="{{url_for('post_detail',post_id=post.id,  _anchor='spot-1')}}">
-                <img src="/static/post_pictures/{{post.post_child[1].image_data}}" class="card-img-top card-img-right-top"/>
+                <img src="{{post.post_child[1].image_data}}" class="card-img-top card-img-right-top"/>
               </a>
               <a href="{{url_for('post_detail',post_id=post.id,  _anchor='spot-2')}}">
-                <img src="/static/post_pictures/{{post.post_child[2].image_data}}" class="card-img-top card-img-right-bottom"/>
+                <img src="{{post.post_child[2].image_data}}" class="card-img-top card-img-right-bottom"/>
               </a>
               <div class="img-more-panel">
                 +{{post.post_child | length - 2}}件
@@ -52,7 +52,7 @@
           {% for child in post.post_child %}
             <div class="post-card-img-wrapper">
               <a href="{{url_for('post_detail',post_id=post.id,  _anchor='spot-' + (loop.index0|string))}}">
-                <img src="/static/post_pictures/{{child.image_data}}" class="card-img-top card-img-single"/>
+                <img src="{{child.image_data}}" class="card-img-top card-img-single"/>
               </a>
             </div>
           {% endfor %}
