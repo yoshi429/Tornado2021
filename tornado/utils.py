@@ -3,9 +3,11 @@ import os
 import secrets
 from PIL import Image
 from flask import current_app
+from tornado import app
 from tornado.models import post_goods
 
 
+# ローカルに写真を保存
 def save_picture(picture, picture_save_path, user_id):
     random_hex = secrets.token_hex(8)
     _, f_ext = os.path.splitext(picture.filename)
@@ -13,23 +15,24 @@ def save_picture(picture, picture_save_path, user_id):
     picture_path = os.path.join(current_app.root_path, picture_save_path, picture_fn)
     print(picture_fn)
     print(picture_path)
-    # output_size = (125, 125)
     i = Image.open(picture)
-    # i.thumbnail(output_size)
     i.save(picture_path)
     
     return picture_fn
 
 
+# amazon s3 で保存
 def save_pictures_s3(picture, user_id):
-    aws_access_key_id = ""
-    aws_secret_access_key = ""
-    s3_bucket = ""
+    aws_access_key_id = app.config["AWS_ACCESS_KEY_ID"]
+    aws_secret_access_key = app.config["AWS_SECRET_ACCESS_KEY"]
+    s3_bucket = app.config['S3_BUCKET']
+
     s3 = boto3.client('s3',
                 region_name='us-east-1',
                 aws_access_key_id=aws_access_key_id,
                 aws_secret_access_key=aws_secret_access_key,
                 )
+                
     random_hex = secrets.token_hex(8)
     _, f_ext = os.path.splitext(picture.filename)
     picture_fn = random_hex + str(user_id) + f_ext
@@ -38,44 +41,27 @@ def save_pictures_s3(picture, user_id):
             Bucket=s3_bucket,
             Key=picture_fn
         )
-    return picture_fn
+    return f"https://tornado2021.s3.amazonaws.com/{picture_fn}"
 
 
+def get_public_url(bucket, target_object_path, s3):
+    """
+    対象のS3ファイルのURLを取得する
 
-def list_post(posts):
-    post_list = []
-    for post in posts:
-        print(post)
-        main_post = post.post_child[0]
-        d = {
-            'postId': post.id,
-            'title': post.title,
-            'timeStamp': post.timestamp,
-            'userName': post.user.username,
-            'userId': post.user.id,
-            # 'goodCount': Good.query.filter_by(post=post).count(),
-            'imageData': main_post.image_data,
-            'content': main_post.content,
-            'location': main_post.location,
-            'lat': main_post.lat,
-            'lng': main_post.lng
-        }
-        post_list.append(d)
-        print(post_list)
-    return post_list
+    Parameters
+    ----------
+    bucket: string
+        S3のバケット名
+    target_object_path: string
+        取得したいS3内のファイルパス
 
-
-def post_detail_list(post_childs):
-    post_detail = []
-    for post_child in post_childs:
-        d = {
-            "content": post_child.content,
-            "image_data": post_child.image_data,
-            "location": post_child.location,
-            "lat": post_child.lat,
-            "lng": post_child.lng,
-            "category": post_child.category,
-            "num": post_child.num
-        }
-        post_detail.append(d)
-    return post_detail
+    Returns
+    ----------
+    url: string
+        S3上のオブジェクトのURL
+    """
+    bucket_location = s3.get_bucket_location(Bucket=bucket)
+    return "https://s3-{0}.amazonaws.com/{1}/{2}".format(
+        bucket_location['LocationConstraint'],
+        bucket,
+        target_object_path)
