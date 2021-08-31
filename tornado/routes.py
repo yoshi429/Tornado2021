@@ -16,7 +16,7 @@ from tornado.utils import save_picture, save_pictures_s3
 @app.route("/user/register", methods=['GET', 'POST'])
 def user_register():
     if current_user.is_authenticated:
-        return redirect(url_for('home'))
+        return redirect(url_for('post_list'))
 
     if request.method == 'POST':
         username = request.form['username']
@@ -37,7 +37,7 @@ def user_register():
         db.session.add(profile)
         db.session.commit()
         print('登録されました')
-        return redirect(url_for('home'))
+        return redirect(url_for('post_list'))
 
     else:
         return render_template('user/register.html')
@@ -48,7 +48,7 @@ def user_register():
 @app.route("/user/login", methods=['POST', 'GET'])
 def user_login():
     if current_user.is_authenticated:
-        return redirect(url_for('home'))
+        return redirect(url_for('post_list'))
 
     if request.method == 'POST':
         email = request.form['email']
@@ -59,7 +59,7 @@ def user_login():
 
         if user and bcrypt.check_password_hash(user.password, password):
             login_user(user, remember=remember)
-            return redirect(url_for('home'))
+            return redirect(url_for('post_list'))
         else:
             print("メールアドレスかパスワードが間違っています。確認しください。")
             return jsonify({'message': "メールアドレスかパスワードが間違っています。確認しください。"}), 404
@@ -206,7 +206,7 @@ def new_post():
 
     if request.method == 'POST':
 
-        category = request.form['category']
+        category = request.form['category'] 
         title = request.form['title']
         content = request.form['content']
         
