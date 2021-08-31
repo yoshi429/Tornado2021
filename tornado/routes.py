@@ -211,8 +211,9 @@ def new_post():
         content = request.form['content']
         
         category_list = Category.query.all()
-        category = random.choice(category_list)
+        # category = random.choice(category_list)
 
+        category = Category.query.filter_by(id=2).first()
         # category = Category.query.filter_by(category_name=category).first()
         if category is None:
             print("無効なカテゴリーです。")
