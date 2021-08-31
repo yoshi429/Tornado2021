@@ -3,8 +3,8 @@
     <img src="{{image_path}}" class="card-img-top w-25 p-3 h-25 d-inline-block">
     <div>{{ user.username }}-{{ user.email }}</div>
     <div>紹介文{{ user.profile_id.content }}</div>
-    <div><a href="{{ url_for('user_follower_list', user_id=user.id)}}">follower-{{ user.followers.count() }}</a></div>
-    <div> <a href="{{ url_for('user_followed_list', user_id=user.id) }}">follow-{{ user.followed.count() }}</a></div>
+    <div><a href="{{ url_for('accounts.user_follower_list', user_id=user.id)}}">follower-{{ user.followers.count() }}</a></div>
+    <div> <a href="{{ url_for('accounts.user_followed_list', user_id=user.id) }}">follow-{{ user.followed.count() }}</a></div>
 
     {% if current_user == user %}
         <div><a href="{{ url_for('edit_profile', user_id=user.id) }}">プロフィール編集</a></div>

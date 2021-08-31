@@ -1,4 +1,3 @@
-import random
 from flask import request, jsonify, redirect, url_for, render_template, request
 from flask_login import login_user, current_user, logout_user, login_required
 
@@ -9,7 +8,7 @@ from tornado.models import (
                             post_goods, Category, Tag,
                             post_tags
                             )
-from tornado.utils import save_picture, save_pictures_s3
+from tornado.utils import save_pictures_s3
 
 
 # ユーザー登録 プロフィール自動登録
@@ -210,11 +209,7 @@ def new_post():
         title = request.form['title']
         content = request.form['content']
         
-        category_list = Category.query.all()
-        # category = random.choice(category_list)
-
-        category = Category.query.filter_by(id=2).first()
-        # category = Category.query.filter_by(category_name=category).first()
+        category = Category.query.filter_by(category_name=category).first()
         if category is None:
             print("無効なカテゴリーです。")
             return jsonify({'message': '無効なカテゴリーです。'})

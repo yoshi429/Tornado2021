@@ -23,7 +23,7 @@
   <body>
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
       <div class="container-fluid">
-        <a class="navbar-brand" href="{{ url_for('post_list') }}">home</a>
+        <a class="navbar-brand" href="{{ url_for('posts.post_list') }}">home</a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
           <span class="navbar-toggler-icon"></span>
         </button>
@@ -31,27 +31,27 @@
           <ul class="navbar-nav">
             {% if current_user.is_authenticated %}
               <li class="nav-item">
-                <a class="nav-link-item active" aria-current="page" href="{{ url_for('user_logout') }}">Log out</a>
+                <a class="nav-link-item active" aria-current="page" href="{{ url_for('accounts.user_logout') }}">Log out</a>
               </li>
               <li class="nav-item">
-                <a class="nav-link-item active" aria-current="page" href="{{ url_for('profile', user_id=current_user.id) }}">プロフィール</a>
+                <a class="nav-link-item active" aria-current="page" href="{{ url_for('accounts.profile', user_id=current_user.id) }}">プロフィール</a>
               </li>
               <li class="nav-item">
-                <a class="nav-link-item active" aria-current="page" href="{{ url_for('my_follow_user_posts') }}">フォロー</a>
+                <a class="nav-link-item active" aria-current="page" href="{{ url_for('accounts.my_follow_user_posts') }}">フォロー</a>
               </li>
               <li class="nav-item">
-                <a class="nav-link-item active" aria-current="page" href="{{ url_for('my_good_list') }}">いいね</a>
+                <a class="nav-link-item active" aria-current="page" href="{{ url_for('accounts.my_good_list') }}">いいね</a>
               </li>
             {% else %}
               <li class="nav-item">
-                <a class="nav-link-item" href="{{ url_for('user_login') }}">Log in</a>
+                <a class="nav-link-item" href="{{ url_for('accounts.user_login') }}">Log in</a>
               </li>
               <li class="nav-item">
-                <a class="nav-link-item" href="{{ url_for('user_register') }}">Register</a>
+                <a class="nav-link-item" href="{{ url_for('accounts.user_register') }}">Register</a>
               </li>
             {% endif %}
             <li class="nav-item">
-              <a class="nav-link-item" href="{{ url_for('ranking_list') }}">ランキング</a>
+              <a class="nav-link-item" href="{{ url_for('posts.ranking_list') }}">ランキング</a>
             </li>
           </ul>
         </div>
