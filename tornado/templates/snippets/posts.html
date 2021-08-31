@@ -4,41 +4,41 @@
       <div class="post-card-img-section">
         {% if post.post_child | length == 1 %}
           <div class="post-card-img-wrapper">
-            <a href="{{url_for('post_detail',post_id=post.id,  _anchor='spot-0')}}">
+            <a href="{{url_for('posts.post_detail',post_id=post.id,  _anchor='spot-0')}}">
               <img src="{{post.post_child[0].image_data}}" class="card-img-top card-img-single"/>
             </a>
           </div>
         {% else %}
           {% if post.post_child | length == 2 %}
             <div class="post-card-img-wrapper">
-              <a href="{{url_for('post_detail',post_id=post.id,  _anchor='spot-0')}}">
+              <a href="{{url_for('posts.post_detail',post_id=post.id,  _anchor='spot-0')}}">
                 <img src="{{post.post_child[0].image_data}}" class="card-img-top card-img-left"/>
               </a>
-              <a href="{{url_for('post_detail',post_id=post.id,  _anchor='spot-1')}}">
+              <a href="{{url_for('posts.post_detail',post_id=post.id,  _anchor='spot-1')}}">
                 <img src="{{post.post_child[1].image_data}}" class="card-img-top card-img-right"/>
               </a>
             </div>
           {% elif post.post_child | length == 3 %}
             <div class="post-card-img-wrapper">
-              <a href="{{url_for('post_detail',post_id=post.id,  _anchor='spot-0')}}">
+              <a href="{{url_for('posts.post_detail',post_id=post.id,  _anchor='spot-0')}}">
                 <img src="{{post.post_child[0].image_data}}" class="card-img-top card-img-left"/>
               </a>
-              <a href="{{url_for('post_detail',post_id=post.id,  _anchor='spot-1')}}">
+              <a href="{{url_for('posts.post_detail',post_id=post.id,  _anchor='spot-1')}}">
                 <img src="{{post.post_child[1].image_data}}" class="card-img-top card-img-right-top"/>
               </a>
-              <a href="{{url_for('post_detail',post_id=post.id,  _anchor='spot-2')}}">
+              <a href="{{url_for('posts.post_detail',post_id=post.id,  _anchor='spot-2')}}">
                 <img src="{{post.post_child[2].image_data}}" class="card-img-top card-img-right-bottom"/>
               </a>
             </div>
           {% elif post.post_child | length >= 4 %}
             <div class="post-card-img-wrapper">
-              <a href="{{url_for('post_detail',post_id=post.id,  _anchor='spot-0')}}">
+              <a href="{{url_for('posts.post_detail',post_id=post.id,  _anchor='spot-0')}}">
                 <img src="{{post.post_child[0].image_data}}" class="card-img-top card-img-left"/>
               </a>
-              <a href="{{url_for('post_detail',post_id=post.id,  _anchor='spot-1')}}">
+              <a href="{{url_for('posts.post_detail',post_id=post.id,  _anchor='spot-1')}}">
                 <img src="{{post.post_child[1].image_data}}" class="card-img-top card-img-right-top"/>
               </a>
-              <a href="{{url_for('post_detail',post_id=post.id,  _anchor='spot-2')}}">
+              <a href="{{url_for('posts.post_detail',post_id=post.id,  _anchor='spot-2')}}">
                 <img src="{{post.post_child[2].image_data}}" class="card-img-top card-img-right-bottom"/>
               </a>
               <div class="img-more-panel">
@@ -51,7 +51,7 @@
           {% endif %}
           {% for child in post.post_child %}
             <div class="post-card-img-wrapper">
-              <a href="{{url_for('post_detail',post_id=post.id,  _anchor='spot-' + (loop.index0|string))}}">
+              <a href="{{url_for('posts.post_detail',post_id=post.id,  _anchor='spot-' + (loop.index0|string))}}">
                 <img src="{{child.image_data}}" class="card-img-top card-img-single"/>
               </a>
             </div>
@@ -59,11 +59,11 @@
         {% endif %}
       </div>
       <div class="card-body-section">
-        <a href="{{url_for('post_detail', post_id=post.id)}}" style="margin-bottom: 18px; display: block;">
+        <a href="{{url_for('posts.post_detail', post_id=post.id)}}" style="margin-bottom: 18px; display: block;">
           <h5 class="card-title">{{post.title}}</h5>
           <p class="card-text">{{post.content}}</p>
         </a>
-        <form class="card-footer-section" action="{{ url_for('post_handle_good', post_id=post.id)}}" method="POST">
+        <form class="card-footer-section" action="{{ url_for('posts.post_handle_good', post_id=post.id)}}" method="POST">
           <button class="card-footer-left" type="button" onclick="openPostModal({{post.id}})">
             コメントを見る
           </button>
@@ -87,7 +87,7 @@
       <div class="post-modal-overlay" onclick="closePostModal({{post.id}})"></div>
       <div class="post-modal-content">
         {# <p>
-            <a href="{{ url_for('good_user_list', post_id=post.id )}}">{{ post.good_user.count() }}件</a>
+            <a href="{{ url_for('posts.good_user_list', post_id=post.id )}}">{{ post.good_user.count() }}件</a>
           </p> #}
         <div class="comment-area">
           {% for comment in post.comment %}
@@ -106,7 +106,7 @@
             <p class="empty-message">コメントはまだ投稿されていません<br/>ぜひ投稿してみましょう!!</p>
             {% endfor%}
           </div>
-          <form class="comment-input-section" action="{{ url_for('new_comment', post_id=post.id) }}" method="POST">
+          <form class="comment-input-section" action="{{ url_for('posts.new_comment', post_id=post.id) }}" method="POST">
             <input class="comment-input-area" type="text" name="content" id="content" placeholder="コメントを入力" inputmode="search" required="required" pattern=".+"/>
             <button class="comment-send-button">
               <i class="material-icons icon">

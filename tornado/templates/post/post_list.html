@@ -1,30 +1,30 @@
 {% extends "layout.html" %}
 {% block content %}
-  {# <form action="{{ url_for('post_list') }}" method="POST">
+  {# <form action="{{ url_for('posts.post_list') }}" method="POST">
     <input type="text" name="keyword" id="keyword" placeholder="keyword" value="{{ keyword }}"/>
     <input type="submit" value="送信"/>
   </form> #}
   <div class="category-tab">
-    <a href="{{ url_for('post_list') }}" class="category-option {{'selected' if selectedTab == '0' else ''}}">
+    <a href="{{ url_for('posts.post_list') }}" class="category-option {{'selected' if selectedTab == '0' else ''}}">
       全て
     </a>
-    <a href="{{ url_for('post_list', category='1') }}" class="category-option {{'selected' if selectedTab == '1' else ''}}">
+    <a href="{{ url_for('posts.post_list', category='1') }}" class="category-option {{'selected' if selectedTab == '1' else ''}}">
       <span class="material-icons">
         pets
       </span>
     </a>
-    <a href="{{ url_for('post_list', category='2') }}" class="category-option {{'selected' if selectedTab == '2' else ''}}">
+    <a href="{{ url_for('posts.post_list', category='2') }}" class="category-option {{'selected' if selectedTab == '2' else ''}}">
       {# TODO: 四葉マークくらいに差し替えたい #}
       <span class="material-icons">
         elderly
       </span>
     </a>
-    <a href="{{ url_for('post_list', category='3') }}" class="category-option {{'selected' if selectedTab == '3' else ''}}">
+    <a href="{{ url_for('posts.post_list', category='3') }}" class="category-option {{'selected' if selectedTab == '3' else ''}}">
       <span class="material-icons">
         accessible
       </span>
     </a>
-    <a href="{{ url_for('my_good_list') }}" class="category-option good-option {{'selected' if selectedTab == 'good' else ''}}">
+    <a href="{{ url_for('accounts.my_good_list') }}" class="category-option good-option {{'selected' if selectedTab == 'good' else ''}}">
       <span class="material-icons">
         thumb_up_alt
       </span>
@@ -45,7 +45,7 @@
   </button>
   <div id="new-post-modal" class="new-post-modal">
     <div class="new-post-modal-overlay" onclick="closeNewPostModal()"></div>
-    <form class="new-post-modal-content" id="new-post-modal-content" method="POST" enctype="multipart/form-data" action="{{ url_for('new_post')}}">
+    <form class="new-post-modal-content" id="new-post-modal-content" method="POST" enctype="multipart/form-data" action="{{ url_for('posts.new_post')}}">
       <div class="category-section">
         <button type="button" class="category-option" id="pets-category-button" onclick="onSelectCategory('pets')">
           <span class="material-icons">

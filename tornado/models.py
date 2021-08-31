@@ -1,6 +1,5 @@
 from datetime import datetime
 from flask_login import UserMixin
-from sqlalchemy.orm import backref
 from tornado import db, login_manager
 
 

@@ -3,9 +3,8 @@ import os
 import secrets
 from PIL import Image
 from flask import current_app
-from tornado import app
-from tornado.models import post_goods
-from tornado.config import AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, S3_BUCKET
+
+from tornado.config import Config
 
 
 # ローカルに写真を保存
@@ -24,9 +23,9 @@ def save_picture(picture, picture_save_path, user_id):
 
 # amazon s3 で保存
 def save_pictures_s3(picture, user_id):
-    aws_access_key_id = app.config["AWS_ACCESS_KEY_ID"]
-    aws_secret_access_key = app.config["AWS_SECRET_ACCESS_KEY"]
-    s3_bucket = app.config['S3_BUCKET']
+    aws_access_key_id = Config.AWS_ACCESS_KEY_ID
+    aws_secret_access_key = Config.AWS_SECRET_ACCESS_KEY
+    s3_bucket = Config.S3_BUCKET
 
     s3 = boto3.client('s3',
                 region_name='us-east-1',
